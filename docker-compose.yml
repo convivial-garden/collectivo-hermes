@@ -13,7 +13,7 @@ services:
       - "8000:8000"
     # Synchronize source code inside and outside the docker container.
     volumes:
-      - ./extensions:/collectivo-app/extensions
+      - ./collectivo_extensions:/collectivo-app/extensions
       - ./docker/static:/app/static
     # Wait for database to be ready (this command will work only on linux),
     # migrate the database changes and start a development server.
@@ -33,9 +33,9 @@ services:
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
       KEYCLOAK_CLIENT_ID: collectivo
       KEYCLOAK_REALM_NAME: collectivo
-      KEYCLOAK_SERVER_URL: http://keycloak:8080  # TODO Change
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
-      COLLECTIVO_EXTENSIONS: menus, auth, extensions, dashboard, members
+      COLLECTIVO_EXTENSIONS: core
       DEBUG: True
       DEVELOPMENT: True
       # Optional environment variables:
