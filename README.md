@@ -1,6 +1,10 @@
 # MILA collectivo
 
-An instance of [collectivo](https://github.com/MILA-Wien/collectivo/) for [MILA](https://www.mila.wien/), which will be running at https://mein.mila.wien/.
+An instance of [collectivo](https://github.com/MILA-Wien/collectivo/) for the cooperative supermarket [MILA](https://www.mila.wien/), which is available at:
+
+- Frontend: https://mein.mila.wien/
+- Backend: https://collectivo.mila.wien/
+- Authentication: https://login.mila.wien/
 
 ## Secrets
 
