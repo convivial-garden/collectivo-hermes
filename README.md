@@ -1,6 +1,6 @@
 # MILA collectivo
 
-An instance of [collectivo](https://github.com/MILA-Wien/collectivo/) for the cooperative supermarket [MILA](https://www.mila.wien/), which is available at:
+An instance of [collectivo](https://github.com/MILA-Wien/collectivo/) for the Austrian cooperative [MILA](https://www.mila.wien/), which is available at:
 
 - Frontend: https://mein.mila.wien/
 - Backend: https://collectivo.mila.wien/
