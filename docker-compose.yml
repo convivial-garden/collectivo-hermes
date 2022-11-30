@@ -7,8 +7,7 @@ services:
   collectivo:
     container_name: collectivo-mila
     restart: always
-    build:
-      context: .
+    image: milawien/collectivo:pr-main
     # Synchronize source code inside and outside the docker container.
     volumes:
       - ./collectivo_extensions:/collectivo-app/extensions
@@ -18,7 +17,7 @@ services:
     # TODO CHANGE TO PRODUCTION SERVER
     command: > #
       sh -c "while ! nc -z collectivo-db 5432; do sleep 1; done &&
-             while ! nc -z login.mila.wien 8080; do sleep 1; done &&
+             while ! nc -z keycloak 8080; do sleep 1; done &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     # Environment variables
@@ -104,7 +103,7 @@ services:
   collectivo-ux:
     container_name: collectivo-mila-ux
     # TODO Change to defined docker hub image with specific version?
-    build: https://github.com/MILA-Wien/collectivo-ux.git#main
+    image: milawien/collectivo-ux:c-pr-main
     restart: always
     environment:
       VIRTUAL_HOST: mein.mila.wien
