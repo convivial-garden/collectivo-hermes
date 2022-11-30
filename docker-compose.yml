@@ -10,7 +10,7 @@ services:
     image: milawien/collectivo:pr-main
     # Synchronize source code inside and outside the docker container.
     volumes:
-      - ./collectivo_extensions:/collectivo-app/extensions
+      - ./collectivo_extensions:/collectivo-app/collectivo_extensions
       - ./docker/static:/app/static
     # Wait for database to be ready (this command will work only on linux),
     # migrate the database changes and start a development server.
@@ -31,7 +31,7 @@ services:
       KEYCLOAK_REALM_NAME: collectivo
       KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
-      COLLECTIVO_EXTENSIONS: core
+      COLLECTIVO_SETTINGS: collectivo_extensions.settings
       DEBUG: False
       DEVELOPMENT: False
       # Optional environment variables:
