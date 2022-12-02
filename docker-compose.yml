@@ -7,18 +7,17 @@ services:
   collectivo:
     container_name: collectivo-mila
     restart: always
-    build:
-      context: .
+    image: milawien/collectivo:pr-main
     # Synchronize source code inside and outside the docker container.
     volumes:
-      - ./collectivo_extensions:/collectivo-app/extensions
+      - ./collectivo_extensions:/collectivo-app/collectivo_extensions
       - ./docker/static:/app/static
     # Wait for database to be ready (this command will work only on linux),
     # migrate the database changes and start a development server.
     # TODO CHANGE TO PRODUCTION SERVER
     command: > #
       sh -c "while ! nc -z collectivo-db 5432; do sleep 1; done &&
-             while ! nc -z login.mila.wien 8080; do sleep 1; done &&
+             while ! nc -z keycloak 8080; do sleep 1; done &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     # Environment variables
@@ -32,7 +31,7 @@ services:
       KEYCLOAK_REALM_NAME: collectivo
       KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
-      COLLECTIVO_EXTENSIONS: core
+      COLLECTIVO_SETTINGS: collectivo_extensions.settings
       DEBUG: False
       DEVELOPMENT: False
       # Optional environment variables:
@@ -104,13 +103,15 @@ services:
   collectivo-ux:
     container_name: collectivo-mila-ux
     # TODO Change to defined docker hub image with specific version?
-    build: https://github.com/MILA-Wien/collectivo-ux.git#main
+    image: milawien/collectivo-ux:c-pr-main
     restart: always
     environment:
       VIRTUAL_HOST: mein.mila.wien
       VIRTUAL_PORT: 80
       LETSENCRYPT_HOST: mein.mila.wien
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      VITE_APP_API: http://collectivo.local:8000
+      VITE_KEYCLOAK_URL: http://keycloak.local:8080
 
   # Keycloak for authentication.
   # TODO Add a seperate database for keycloak
