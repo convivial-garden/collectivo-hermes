@@ -32,6 +32,7 @@ services:
       KEYCLOAK_SERVER_URL: ${COLLECTIVO_KEYCLOAK_SERVER_URL}
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
       COLLECTIVO_SETTINGS: collectivo_extensions.settings
+      COLLECTIVO_EXTENSIONS: members
       DEBUG: False
       DEVELOPMENT: False
       # Optional environment variables:
