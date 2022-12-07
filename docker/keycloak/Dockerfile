@@ -1,9 +1,17 @@
-FROM quay.io/keycloak/keycloak:19.0.2
+FROM quay.io/keycloak/keycloak:19.0.2 as builder
+
+# Enable health and metrics support
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+ENV KC_DB=postgres
+
 WORKDIR /opt/keycloak
-COPY ./import/* /opt/keycloak/data/import/
-# for demonstration purposes only, please make sure to use proper certificates in production instead
-RUN /opt/keycloak/bin/kc.sh import --dir /opt/keycloak/data/import
-ENV ROOT_LOGLEVEL=ALL
-ENV KEYCLOAK_LOGLEVEL=DEBUG
-# change these values to point to a running postgres instance
-CMD [ "start-dev" ]
+RUN /opt/keycloak/bin/kc.sh build --db=postgres
+RUN /opt/keycloak/bin/kc.sh show-config
+
+FROM quay.io/keycloak/keycloak:latest
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+
+COPY ./kcWithAutoImport.sh /opt/keycloak/bin/kcWithAutoImport.sh
+
+ENTRYPOINT [ "/opt/keycloak/bin/kcWithAutoImport.sh" ]

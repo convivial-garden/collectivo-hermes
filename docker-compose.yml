@@ -29,24 +29,27 @@ services:
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
       KEYCLOAK_CLIENT_ID: collectivo
       KEYCLOAK_REALM_NAME: collectivo
-      KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
+      KEYCLOAK_SERVER_URL: ${COLLECTIVO_KEYCLOAK_SERVER_URL}
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
       COLLECTIVO_SETTINGS: collectivo_extensions.settings
+      COLLECTIVO_EXTENSIONS: members
       DEBUG: False
       DEVELOPMENT: False
       # Optional environment variables:
-      ALLOWED_HOSTS: collectivo.mila.wien
+      ALLOWED_HOSTS: ${COLLECTIVO_URL}
       # See https://docs.djangoproject.com/en/3.2/topics/i18n/
       # LANGUAGE_CODE
       # TIME_ZONE
       # KEYCLOAK_CLIENT_ID: collectivo
       # KEYCLOAK_REALM_NAME: collectivo
-      VIRTUAL_HOST: collectivo.mila.wien
+      VIRTUAL_HOST: ${COLLECTIVO_URL}
       VIRTUAL_PORT: 8000
-      LETSENCRYPT_HOST: collectivo.mila.wien
+      LETSENCRYPT_HOST: ${COLLECTIVO_URL}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     depends_on:
       - collectivo-db
+      - keycloak
+    links:
       - keycloak
 
   collectivo-static:
@@ -87,7 +90,6 @@ services:
       - ./certs:/etc/nginx/certs:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:rw
-
   # A PostgreSQL database.
   collectivo-db:
     container_name: collectivo-mila-db
@@ -102,20 +104,28 @@ services:
   # A frontend web application.
   collectivo-ux:
     container_name: collectivo-mila-ux
-    # TODO Change to defined docker hub image with specific version?
-    image: milawien/collectivo-ux:c-pr-main
+    # TODO Change to defined docker hub image with _specific version_?
+    image: milawien/collectivo-ux:latest
     restart: always
     environment:
-      VIRTUAL_HOST: mein.mila.wien
+      VIRTUAL_HOST: ${COLLECTIVO_UX_URL}
       VIRTUAL_PORT: 80
-      LETSENCRYPT_HOST: mein.mila.wien
+      LETSENCRYPT_HOST: ${COLLECTIVO_UX_URL}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-      VITE_APP_API: http://collectivo.local:8000
-      VITE_KEYCLOAK_URL: http://keycloak.local:8080
+      VITE_APP_API: ${COLLECTIVO_UX_API_URL}
+      VITE_KEYCLOAK_URL: ${COLLECTIVO_UX_KEYCLOAK_URL}
 
+  # Database for keycloak
+  keycloak-db:
+    container_name: keycloak-db
+    image: postgres:14-alpine
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
   # Keycloak for authentication.
-  # TODO Add a seperate database for keycloak
-  # TODO Adapt for production
   keycloak:
     build: ./docker/keycloak
     container_name: collectivo-mila-keycloak
@@ -123,19 +133,24 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KEYCLOAK_FRONTEND_URL: ${KEYCLOAK_SERVER_URL}
-      ROOT_LOGLEVEL: ALL  # TODO CHange for production?
-      KEYCLOAK_LOGLEVEL: DEBUG  # TODO CHange for production?
-      VIRTUAL_HOST: login.mila.wien
+      KEYCLOAK_IMPORT: /tmp/collectivo-realm.json
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_DB_SCHEMA: public
+      KC_DB_URL_DATABASE: ${KEYCLOAK_DB_NAME}
+      KC_DB_URL_HOST: ${KEYCLOAK_DB_HOST}
+      KC_DB_URL_PORT: 5432
+      KC_HOSTNAME: ${KEYCLOAK_SERVER_URL}
+      VIRTUAL_HOST: ${KEYCLOAK_SERVER_URL}
       VIRTUAL_PORT: 8080
-      LETSENCRYPT_HOST: login.mila.wien
+      LETSENCRYPT_HOST: ${KEYCLOAK_SERVER_URL}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-    # TODO Remove?
     volumes:
-      - ./docker/keycloak/import:/opt/keycloak/data/import:ro
-      - ./docker/keycloak/export:/tmp/export
-    # TODO Remove? Import realm should not happen on accident and delete all users
-    command:
-      start-dev --import-realm
-
+      - ./docker/keycloak/import/collectivo-realm.json:/tmp/collectivo-realm.json
+    depends_on:
+      - keycloak-db
+    links:
+      - keycloak-db
 volumes:
   collectivo-db-data:
+  keycloak-db-data:
