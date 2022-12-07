@@ -12,6 +12,6 @@ RUN /opt/keycloak/bin/kc.sh show-config
 FROM quay.io/keycloak/keycloak:latest
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
-COPY ./kcWithAutoImport.sh /opt/keycloak/bin/kcWithAutoImport.sh
+COPY ./scripts/kcWithAutoImport.sh /opt/keycloak/bin/kcWithAutoImport.sh
 
 ENTRYPOINT [ "/opt/keycloak/bin/kcWithAutoImport.sh" ]
