@@ -22,7 +22,6 @@ div.kc-logo-text{
     background-image: none;
     background-size: contain;
     padding: 20px;
-    background-color: #FFF;
     background-position: center;
 }
 #kc-header-wrapper {
@@ -38,5 +37,5 @@ div.kc-logo-text{
     /* background-color: #FFF; */
     background-position: center;
     background-repeat: no-repeat;
-    min-height: 100px;
+    min-height: 150px;
 }
