@@ -19,7 +19,7 @@
     --pf-global--primary-color--100: unset;
 }
 div.kc-logo-text{
-    background-image: url(../img/mila_logo_header.png);
+    background-image: none;
     background-size: contain;
     padding: 20px;
     background-color: #FFF;
@@ -32,11 +32,11 @@ div.kc-logo-text{
     line-height: 1.2em;
     padding: 62px 10px 20px;
     white-space: normal;
-    background-image: url(../img/mila_logo_header.png);
+    background-image: url(../img/mila_logo_subline_transparent.png);
     background-size: contain;
     padding: 20px;
     /* background-color: #FFF; */
     background-position: center;
     background-repeat: no-repeat;
-    min-height: 70px;
+    min-height: 100px;
 }
