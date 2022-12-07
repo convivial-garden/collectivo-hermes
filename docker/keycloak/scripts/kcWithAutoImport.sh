@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMPORT_FLAG_FILE=/opt/keycloak/imported.flag
+IMPORT_FLAG_FILE=/opt/keycloak/imported/imported.flag
 
 if [[ -z "${KEYCLOAK_IMPORT}" ]]; then
   echo "Skipping Import (KEYCLOAK_IMPORT not used)"
