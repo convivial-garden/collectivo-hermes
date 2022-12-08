@@ -3,7 +3,6 @@ version: "3.9"
 services:
 
   # A customized instance of collectivo for MILA.
-  # TODO LOAD INSTANCE FROM DOCKER HUB
   collectivo:
     container_name: collectivo-mila
     restart: always
@@ -14,7 +13,6 @@ services:
       - ./docker/static:/app/static
     # Wait for database to be ready (this command will work only on linux),
     # migrate the database changes and start a development server.
-    # TODO CHANGE TO PRODUCTION SERVER
     command: > #
       sh -c "while ! nc -z collectivo-db 5432; do sleep 1; done &&
              while ! nc -z keycloak 8080; do sleep 1; done &&
@@ -33,16 +31,9 @@ services:
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
       COLLECTIVO_SETTINGS: collectivo_extensions.settings
       COLLECTIVO_EXTENSIONS: members
-
-      DEBUG: False
-      DEVELOPMENT: False
-      # Optional environment variables:
+      DEBUG: 'False'
+      DEVELOPMENT: 'False'
       ALLOWED_HOSTS: ${COLLECTIVO_URL}
-      # See https://docs.djangoproject.com/en/3.2/topics/i18n/
-      # LANGUAGE_CODE
-      # TIME_ZONE
-      # KEYCLOAK_CLIENT_ID: collectivo
-      # KEYCLOAK_REALM_NAME: collectivo
       VIRTUAL_HOST: ${COLLECTIVO_URL}
       VIRTUAL_PORT: 8000
       LETSENCRYPT_HOST: ${COLLECTIVO_URL}

@@ -3,7 +3,6 @@ version: "3.9"
 services:
 
   # A customized instance of collectivo for MILA.
-  # TODO LOAD INSTANCE FROM DOCKER HUB
   collectivo:
     container_name: collectivo-mila
     restart: always
@@ -33,15 +32,9 @@ services:
       KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
       COLLECTIVO_SETTINGS: collectivo_extensions.settings
       COLLECTIVO_EXTENSIONS: members
-      DEBUG: False
-      DEVELOPMENT: False
-      # Optional environment variables:
+      DEBUG: 'False'
+      DEVELOPMENT: 'False'
       ALLOWED_HOSTS: ${COLLECTIVO_URL}
-      # See https://docs.djangoproject.com/en/3.2/topics/i18n/
-      # LANGUAGE_CODE
-      # TIME_ZONE
-      # KEYCLOAK_CLIENT_ID: collectivo
-      # KEYCLOAK_REALM_NAME: collectivo
       VIRTUAL_HOST: ${COLLECTIVO_URL}
       VIRTUAL_PORT: 8000
       LETSENCRYPT_HOST: ${COLLECTIVO_URL}
@@ -88,6 +81,7 @@ services:
       - ./certs:/etc/nginx/certs:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:rw
+
   # A PostgreSQL database.
   collectivo-db:
     container_name: collectivo-mila-db
@@ -102,7 +96,6 @@ services:
   # A frontend web application.
   collectivo-ux:
     container_name: collectivo-mila-ux
-    # TODO Change to defined docker hub image with _specific version_?
     image: milawien/collectivo-ux:latest
     restart: always
     environment:
