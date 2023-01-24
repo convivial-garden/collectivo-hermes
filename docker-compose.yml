@@ -31,6 +31,7 @@ services:
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USE_SSL: ${EMAIL_USE_SSL}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
@@ -75,6 +76,7 @@ services:
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USE_SSL: ${EMAIL_USE_SSL}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS}
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
@@ -86,6 +88,8 @@ services:
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
       CELERY_BROKER: redis://redis:6379/0
       CELERY_BACKEND: redis://redis:6379/0
+    labels:
+      io.portainer.accesscontrol.teams: mila
     depends_on:
       - collectivo
       - redis
@@ -94,6 +98,8 @@ services:
   redis:
     container_name: redis
     image: redis:7.0-alpine
+    labels:
+      io.portainer.accesscontrol.teams: mila
 
   # A static files server for django.
   collectivo-static:
@@ -152,7 +158,7 @@ services:
   # A frontend web application.
   collectivo-ux:
     container_name: collectivo-mila-ux
-    image: milawien/collectivo-ux:v0.2.1
+    image: milawien/collectivo-ux:v0.2.2
     restart: always
     environment:
       VIRTUAL_HOST: ${COLLECTIVO_UX_URL}
