@@ -5,7 +5,7 @@ services:
   collectivo:
     container_name: collectivo-mila
     restart: always
-    image: milawien/collectivo:v0.5.4
+    image: milawien/collectivo:v0.5.5
     volumes:
       - ./docker/static:/app/static
     command: >
@@ -55,7 +55,7 @@ services:
   celery:
     container_name: celery
     restart: always
-    image: milawien/collectivo:v0.5.4
+    image: milawien/collectivo:v0.5.5
     command: celery -A collectivo_app worker -l info
     volumes:
       - ./docker/static:/app/static
@@ -96,7 +96,7 @@ services:
   celery-beat:
     container_name: celery-beat
     restart: always
-    image: milawien/collectivo:v0.5.4
+    image: milawien/collectivo:v0.5.5
     command: celery -A collectivo_app beat -l info
     volumes:
       - ./docker/static:/app/static
@@ -204,7 +204,7 @@ services:
   # A frontend web application.
   collectivo-ux:
     container_name: collectivo-mila-ux
-    image: milawien/collectivo-ux:v0.4.0
+    image: milawien/collectivo-ux:v0.4.1
     restart: always
     environment:
       VIRTUAL_HOST: ${COLLECTIVO_UX_URL}
