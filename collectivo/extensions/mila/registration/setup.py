@@ -1,10 +1,8 @@
 """Setup function for the MILA registration extension."""
-from collectivo.core.stores import main_store
 from collectivo.dashboard.models import DashboardTile
 from collectivo.extensions.models import Extension
 from collectivo.memberships.models import MembershipStatus
 
-from . import serializers
 from .models import SurveyGroup, SurveySkill
 
 
@@ -16,10 +14,6 @@ def setup(sender, **kwargs):
         label="MILA Registration",
         description="Membership registration for MILA.",
         version="1.0.0",
-    )
-
-    main_store.user_profiles_admin_serializers.append(
-        serializers.SurveyProfileSerializer
     )
 
     DashboardTile.register(
