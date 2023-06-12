@@ -23,7 +23,7 @@ def setup(sender, **kwargs):
         parent="main",
         icon_name="pi-money-bill",
         extension=extension,
-        requires_group="collectivo.direktkredit.user",
+        requires_perm="collectivo.direktkredit.user",
         link=f"{os.environ.get('DIREKTKREDIT_SERVER_URL')}/login-oidc",
         target="blank",
     )
@@ -41,7 +41,7 @@ def setup(sender, **kwargs):
         extension=extension,
         source="db",
         content="Hier kannst du deine Direktkredite einsehen und verwalten.",
-        requires_group="collectivo.direktkredit.user",
+        requires_perm="collectivo.direktkredit.user",
     )
 
     tile.buttons.set([button])
@@ -54,7 +54,7 @@ def setup(sender, **kwargs):
         icon_name="pi-money-bill",
         parent="admin",
         extension=extension,
-        requires_group="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         link=f"{os.environ.get('DIREKTKREDIT_SERVER_URL')}/login-oidc-admin",
         target="blank",
         order=29,
