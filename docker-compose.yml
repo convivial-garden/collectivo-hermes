@@ -5,7 +5,7 @@ services:
   collectivo:
     container_name: collectivo-mila
     restart: always
-    image: milawien/collectivo:v0.5.9
+    image: milawien/collectivo:v0.6.3
     volumes:
       - ./docker/static:/app/static
     command: >
@@ -43,6 +43,9 @@ services:
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       DIREKTKREDIT_SERVER_URL: https://${HABIDAT_SERVER_URL}
+      LOTZAPP_URL: "${LOTZAPP_URL}"
+      LOTZAPP_USER: "${LOTZAPP_USER}"
+      LOTZAPP_PASS: "${LOTZAPP_PASS}"
     labels:
       io.portainer.accesscontrol.teams: mila
     depends_on:
@@ -57,7 +60,7 @@ services:
   celery:
     container_name: celery
     restart: always
-    image: milawien/collectivo:v0.5.9
+    image: milawien/collectivo:v0.6.3
     command: celery -A collectivo_app worker -l info
     volumes:
       - ./docker/static:/app/static
@@ -90,6 +93,9 @@ services:
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       DIREKTKREDIT_SERVER_URL: ${HABIDAT_SERVER_URL}
+      LOTZAPP_URL: "${LOTZAPP_URL}"
+      LOTZAPP_USER: "${LOTZAPP_USER}"
+      LOTZAPP_PASS: "${LOTZAPP_PASS}"
     labels:
       io.portainer.accesscontrol.teams: mila
     depends_on:
@@ -100,7 +106,7 @@ services:
   celery-beat:
     container_name: celery-beat
     restart: always
-    image: milawien/collectivo:v0.5.9
+    image: milawien/collectivo:v0.6.3
     command: celery -A collectivo_app beat -l info
     volumes:
       - ./docker/static:/app/static
@@ -133,6 +139,9 @@ services:
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       DIREKTKREDIT_SERVER_URL: ${HABIDAT_SERVER_URL}
+      LOTZAPP_URL: "${LOTZAPP_URL}"
+      LOTZAPP_USER: "${LOTZAPP_USER}"
+      LOTZAPP_PASS: "${LOTZAPP_PASS}"
     labels:
       io.portainer.accesscontrol.teams: mila
     depends_on:
@@ -211,7 +220,7 @@ services:
   # A frontend web application.
   collectivo-ux:
     container_name: collectivo-mila-ux
-    image: milawien/collectivo-ux:v0.4.3
+    image: milawien/collectivo-ux:v0.5.3
     restart: always
     environment:
       VIRTUAL_HOST: ${COLLECTIVO_UX_URL}
