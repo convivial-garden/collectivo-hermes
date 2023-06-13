@@ -1,6 +1,5 @@
 {
   "extensions": [
-    "example",
     "shifts",
     "mila_direktkredit",
     "mila_registration",
