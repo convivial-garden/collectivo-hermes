@@ -32,3 +32,4 @@ extensions:
   - collectivo.shifts
   - mila.direktkredit
   - mila.registration
+  - mila.lotzapp

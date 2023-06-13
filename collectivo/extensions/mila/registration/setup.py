@@ -21,7 +21,7 @@ def setup(sender, **kwargs):
         label="Membership",
         extension=extension,
         source="component",
-        route=extension.name + "/mila_membership_tile",
+        component="mila_membership_tile",
     )
 
     for status in ["Aktiv", "Investierend"]:

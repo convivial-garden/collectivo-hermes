@@ -24,14 +24,14 @@ def setup(sender, **kwargs):
         icon_name="pi-money-bill",
         extension=extension,
         requires_perm="collectivo.direktkredit.user",
-        link=f"{os.environ.get('DIREKTKREDIT_SERVER_URL')}/login-oidc",
-        target="blank",
+        link=f"{os.environ.get('HABIDAT_SERVER_URL')}/login-oidc",
+        target="link_blank",
     )
 
     button = DashboardTileButton.objects.register(
         name="direktkredit_button",
         label="Weiter",
-        link=f"{os.environ.get('DIREKTKREDIT_SERVER_URL')}/login-oidc",
+        link=f"{os.environ.get('HABIDAT_SERVER_URL')}/login-oidc",
         link_type="external",
     )
 
@@ -55,7 +55,7 @@ def setup(sender, **kwargs):
         parent="admin",
         extension=extension,
         requires_perm=("admin", "core"),
-        link=f"{os.environ.get('DIREKTKREDIT_SERVER_URL')}/login-oidc-admin",
-        target="blank",
+        link=f"{os.environ.get('HABIDAT_SERVER_URL')}/login-oidc-admin",
+        target="link_blank",
         order=29,
     )

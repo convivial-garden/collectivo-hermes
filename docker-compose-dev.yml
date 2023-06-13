@@ -15,8 +15,7 @@ services:
       - ./docker/static:/app/static
     command: >
       sh -c "python manage.py migrate &&
-             gunicorn collectivo_app.wsgi:application --bind 0.0.0.0:8000
-             "
+             python manage.py runserver 0.0.0.0:8000"
     environment:
       DB_HOST: collectivo-db
       DB_NAME: collectivo_db
@@ -36,6 +35,7 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      HABIDAT_SERVER_URL: ${HABIDAT_SERVER_URL}
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -75,6 +75,7 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      HABIDAT_SERVER_URL: ${HABIDAT_SERVER_URL}
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -112,6 +113,7 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      HABIDAT_SERVER_URL: ${HABIDAT_SERVER_URL}
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -166,6 +168,12 @@ services:
       # ./collectivo-ux
       context: ./collectivo-ux
       dockerfile: ./Dockerfile-dev
+    volumes:
+      - ../collectivo-ux:/app
+      - ./collectivo-ux/collectivo.json:/app/src/collectivo.json
+      - ./collectivo-ux/extensions/mila_direktkredit:/app/src/extensions/mila_direktkredit
+      - ./collectivo-ux/extensions/mila_registration:/app/src/extensions/mila_registration
+      - ./collectivo-ux/extensions/mila_lotzapp:/app/src/extensions/mila_lotzapp
     restart: always
     environment:
       VITE_APP_API: ${COLLECTIVO_URL}
@@ -195,7 +203,6 @@ services:
     command: start-dev --import-realm
     ports:
       - "8080:8080"
-
 
 volumes:
   collectivo-db-data:
