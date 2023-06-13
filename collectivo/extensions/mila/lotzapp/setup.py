@@ -25,7 +25,7 @@ def setup(sender, **kwargs):
         icon_name="pi-sync",
         requires_perm=("admin", "core"),
         parent="admin",
-        order=10,
+        order=30,
     )
 
     settings = LotzappSettings.object()
