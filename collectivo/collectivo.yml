@@ -8,9 +8,12 @@ secret_key: ${SECRET_KEY}
 allowed_hosts: ${ALLOWED_HOSTS}
 allowed_origins: ${ALLOWED_ORIGINS}
 
-development: false
-example_data: false
-api_docs: false
+admin_user: ${ADMIN_USER}
+admin_pass: ${ADMIN_PASS}
+
+development: true
+example_data: true
+api_docs: true
 
 extensions:
   - collectivo.core
@@ -24,11 +27,15 @@ extensions:
   - collectivo.components
   - collectivo.dashboard
   - collectivo.profiles
-  - collectivo.memberships
+  - collectivo.memberships:
+      - registration_serializers:
+          - update: collectivo.profiles.serializers.ProfileRegisterSerializer
+          - update: collectivo.payments.serializers.PaymentProfileSerializer
+          - create: collectivo.memberships.serializers.MembershipRegisterSerializer
   - collectivo.tags
   - collectivo.emails
   - collectivo.emails.tags
   - collectivo.payments
   - collectivo.shifts
-  - mila.direktkredit
-  - mila.registration
+  - hermes.disposerv
+

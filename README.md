@@ -1,11 +1,6 @@
-# Mein MILA
+# Hermes Disposerver
 
-An instance of [collectivo](https://github.com/MILA-Wien/collectivo/) for the Austrian cooperative [MILA](https://www.mila.wien/), which is available at:
-
-- Frontend: https://mein.mila.wien/
-- Backend: https://collectivo.mila.wien/
-- Authentication: https://login.mila.wien/
-
+An instance of [collectivo](https://github.com/MILA-Wien/collectivo/) for the Austrian Hermes Radbot:innen colelctiv [HERMES](https://www.hermes.at/).
 ## Documentation
 
 The documentation of collectivo can be found [here](https://github.com/MILA-Wien/collectivo/).
@@ -20,12 +15,14 @@ For local testing of this repository, follow these steps:
 6. Access your instance via https://127.0.0.1, and https://keycloak.local (accept security risk on each)
 
 
-## Habidat
 
-In order to set up the habidat integration, you need to start the container without a volume mounted to config and then run the following commands:
-
-```
-cd ./docker/habidat && docker cp habidat:/app/config ./config
-```
-
-Then you can start the container with the volume mounted to config.
+[out:csv ("name")][timeout:2500];
+{{geocodeArea:Wien}}->.searchArea;
+(
+  way["highway"]["name"](area.searchArea);
+);
+for (t["name"])
+{
+  make street name=_.val;
+  out;
+}

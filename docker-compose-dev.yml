@@ -1,18 +1,16 @@
 version: "3.9"
 
 services:
-  # A customized instance of collectivo for MILA.
+  # A customized instance of collectivo for HERMES.
   collectivo:
-    container_name: collectivo-mila
     restart: always
     build: ./collectivo
     volumes:
       - ../collectivo/collectivo_app:/collectivo_app
       - ../collectivo/collectivo:/collectivo_app/collectivo
       - ./collectivo/collectivo-dev.yml:/collectivo_app/collectivo.yml
-      - ./collectivo/extensions/mila:/collectivo_app/mila
-
-      - ./docker/static:/app/static
+      - ./collectivo/extensions/hermes:/collectivo_app/hermes
+      - ./uploads:/collectivo_app/media_root/
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
@@ -26,8 +24,8 @@ services:
       ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
       KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
-      CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
-      CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
+      CELERY_BROKER: ${REDIS_URL}
+      CELERY_BACKEND: ${REDIS_URL}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USE_SSL: ${EMAIL_USE_SSL}
@@ -35,7 +33,8 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-      HABIDAT_SERVER_URL: ${HABIDAT_SERVER_URL}
+      ADMIN_USER: ${COLLECTIVO_ADMIN_USER}
+      ADMIN_PASS: ${COLLECTIVO_ADMIN_PASS}
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -49,13 +48,14 @@ services:
   # A celery worker that runs in the background.
   # Image & environment should be the same as collectivo-mila.
   celery:
-    container_name: celery
     restart: always
     command: celery -A collectivo_app worker -l info
     build: ./collectivo
     volumes:
+      - ../collectivo/collectivo_app:/collectivo_app
+      - ../collectivo/collectivo:/collectivo_app/collectivo
       - ./collectivo/collectivo-dev.yml:/collectivo_app/collectivo.yml
-      - ./docker/static:/app/static
+      - ./collectivo/extensions/hermes:/collectivo_app/hermes
     environment:
       DB_HOST: collectivo-db
       DB_NAME: collectivo_db
@@ -66,8 +66,8 @@ services:
       ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
       KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
-      CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
-      CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
+      CELERY_BROKER: ${REDIS_URL}
+      CELERY_BACKEND: ${REDIS_URL}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USE_SSL: ${EMAIL_USE_SSL}
@@ -75,7 +75,6 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-      HABIDAT_SERVER_URL: ${HABIDAT_SERVER_URL}
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -87,13 +86,14 @@ services:
   # A celery worker that runs scheduled tasks in the background.
   # Image & environment should be the same as collectivo-mila.
   celery-beat:
-    container_name: celery-beat
     restart: always
     command: celery -A collectivo_app beat -l info
     build: ./collectivo
     volumes:
+      - ../collectivo/collectivo_app:/collectivo_app
+      - ../collectivo/collectivo:/collectivo_app/collectivo
       - ./collectivo/collectivo-dev.yml:/collectivo_app/collectivo.yml
-      - ./docker/static:/app/static
+      - ./collectivo/extensions/hermes:/collectivo_app/hermes
     environment:
       DB_HOST: collectivo-db
       DB_NAME: collectivo_db
@@ -104,8 +104,8 @@ services:
       ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
       KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
-      CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
-      CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
+      CELERY_BROKER: ${REDIS_URL}
+      CELERY_BACKEND: ${REDIS_URL}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USE_SSL: ${EMAIL_USE_SSL}
@@ -113,7 +113,6 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-      HABIDAT_SERVER_URL: ${HABIDAT_SERVER_URL}
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -124,7 +123,7 @@ services:
 
   # A communication broker for celery.
   redis:
-    container_name: redis
+    container_name: name
     image: redis:7.0-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -132,21 +131,8 @@ services:
       --requirepass "${REDIS_PASSWORD}" --appendonly yes --maxmemory 1000mb
       --maxmemory-policy volatile-lru
 
-  # A static files server for django.
-  collectivo-static:
-    container_name: colletivo-mila-static
-    image: nginx:alpine
-    ports:
-      - "8002:80"
-    volumes:
-      - ./docker/static:/app/static
-      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
-      - ./docker/nginx/error.html:/usr/share/nginx/html/index.html
-    restart: always
-
   # A PostgreSQL database.
   collectivo-db:
-    container_name: collectivo-mila-db
     image: postgres:14-alpine
     volumes:
       - collectivo-db-data:/var/lib/postgresql/data
@@ -162,35 +148,24 @@ services:
 
   # Frontend for collectivo.
   collectivo-ux:
-    container_name: collectivo-ux
-    command: yarn dev -- --host
-    build:
-      # ./collectivo-ux
-      context: ./collectivo-ux
-      dockerfile: ./Dockerfile-dev
-    volumes:
-      - ../collectivo-ux:/app
-      - ./collectivo-ux/collectivo.json:/app/src/collectivo.json
-      - ./collectivo-ux/extensions/mila_direktkredit:/app/src/extensions/mila_direktkredit
-      - ./collectivo-ux/extensions/mila_registration:/app/src/extensions/mila_registration
-      - ./collectivo-ux/extensions/mila_lotzapp:/app/src/extensions/mila_lotzapp
+    image: milawien/collectivo-ux:latest
     restart: always
     environment:
-      VITE_APP_API: ${COLLECTIVO_URL}
+      VITE_API_URL: ${COLLECTIVO_URL}
       VITE_KEYCLOAK_URL: ${KEYCLOAK_URL}
     ports:
       - "8001:80"
-      - "5173:5173"
+      # - "5173:5173"
 
   # Keycloak for authentication.
   keycloak:
     build: ./docker/keycloak-dev
-    container_name: keycloak-mila
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       ROOT_LOGLEVEL: ALL
       KEYCLOAK_LOGLEVEL: DEBUG
+      KC_HOSTNAME: ${KEYCLOAK_URL_BASE}
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://127.0.0.1:8080/realms/master"]
       interval: 5s
@@ -200,9 +175,9 @@ services:
       - ./docker/keycloak/import:/opt/keycloak/data/import:ro
       - ./docker/keycloak/export:/tmp/export
       - ./docker/keycloak/healthcheck.sh:/healthcheck.sh
-    command: start-dev --import-realm
     ports:
       - "8080:8080"
 
+  # For Documentation development
 volumes:
   collectivo-db-data:

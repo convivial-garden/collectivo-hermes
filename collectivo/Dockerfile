@@ -1,5 +1,5 @@
 # Use collectivo as parent image
-FROM milawien/collectivo:v0.6.3
+FROM milawien/collectivo:latest
 
 # Change to root user to install extensions
 USER root

@@ -15,7 +15,7 @@ api_docs: true
 extensions:
   - collectivo.core
   - collectivo.auth.keycloak:
-      - server_url: ${KEYCLOAK_URL}
+      - server_url: ${KEYCLOAK_SERVER_URL}
       - realm_name: collectivo
       - client_id: collectivo
       - client_secret: ${KEYCLOAK_CLIENT_SECRET}
@@ -24,12 +24,16 @@ extensions:
   - collectivo.components
   - collectivo.dashboard
   - collectivo.profiles
-  - collectivo.memberships
+#  - collectivo.memberships
+#  - collectivo.memberships.emails
   - collectivo.tags
   - collectivo.emails
   - collectivo.emails.tags
-  - collectivo.payments
+#  - collectivo.payments
   - collectivo.shifts
-  - mila.direktkredit
-  - mila.registration
-  - mila.lotzapp
+  - hermes.disposerv
+
+# hermes:
+#   settings:
+#     server_url: ${DISPOSERV_SERVER_URL}
+
