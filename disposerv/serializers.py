@@ -4,6 +4,8 @@ from .models import \
     Address, \
     Customer, \
     ContractPosition, \
+    RepeatedContractPosition, \
+    RepeatedContract, \
     Street, \
     Contract, \
     Dispo, \
@@ -29,13 +31,15 @@ def create_new_position(validated_data, **kwargs):
     if (streetWithNumber):
         position.lat = streetWithNumber[0].lat
         position.lon = streetWithNumber[0].lon
+    elif address.get('street') == "":
+        print("no street")
     else:
         here_maps_api_key = "Up_vTCjQcg2_WoQK79Dlzj6a_MMliPdfYhO0Cvn3kf4"
         settings = Settings.objects.first()
         if (here_maps_api_key == ''):
                 print("ERROR: no here maps api key")
         else:
-            print("get streets from here maps")
+            print("createnewposition: get streets from here maps")
             url = "https://geocode.search.hereapi.com/v1/geocode?at="+str(settings.gps_lat)+","+str(settings.gps_lon)+"&q="+address.get('street')+" "+address.get('number')+" "+address.get('postal_code')+"&lang=de&limit=5&apiKey="+here_maps_api_key
             print(url)
             data = requests.get(url)
@@ -69,10 +73,12 @@ def update_instance_address(instance_address, address_data):
 
 def update_position_instance(instance, validated_data):
     instance.customer = validated_data.get('new_customer', instance.customer)
+    instance.customer_is_drop_off = validated_data.get('customer_is_drop_off', instance.customer_is_drop_off)
+    instance.customer_is_pick_up = validated_data.get('customer_is_pick_up', instance.customer_is_pick_up)
     instance.anon_name = validated_data.get('anon_name', instance.anon_name)
     instance.position = validated_data.get('position', instance.position)
-    instance.start_mode = validated_data.get('start_mode', instance.start_mode)
     instance.start_time = validated_data.get('start_time', instance.start_time)
+    instance.start_time_to = validated_data.get('start_time_to', instance.start_time_to)
     instance.memo = validated_data.get('memo', instance.memo)
     instance.weight_size_bonus = validated_data.get('weight_size_bonus', instance.weight_size_bonus)
     instance.is_express = validated_data.get('is_express', instance.is_express)
@@ -227,7 +233,7 @@ class CustomerSerializer(serializers.HyperlinkedModelSerializer):
                     if (here_maps_api_key == ''):
                             print("ERROR: no here maps api key")
                     else:
-                        print("get streets from here maps")
+                        print("CustomerSerializer: get streets from here maps")
                         url = "https://geocode.search.hereapi.com/v1/geocode?at="+str(settings.gps_lat)+","+str(settings.gps_lon)+"&q="+address_data.get('street')+" "+address_data.get('number')+" "+address_data.get('postal_code')+"&lang=de&limit=5&apiKey="+here_maps_api_key
                         print(url)
                         data = requests.get(url)
@@ -283,11 +289,13 @@ class ContractPositionSerializer(serializers.HyperlinkedModelSerializer):
             'id',
             'url',
             'position',
-            'start_mode',
             'start_time',
+            'start_time_to',
             'memo',
             'address',
             'customer',
+            'customer_is_pick_up',
+            'customer_is_drop_off',
             'new_customer',
             'anon_name',
             'dispo',
@@ -305,13 +313,6 @@ class ContractPositionSerializer(serializers.HyperlinkedModelSerializer):
             'email',
             'talk_to'
         )
-        extra_kwargs = {
-            'start_mode': {
-                # Tell DRF that the link field is not required.
-                'required': False,
-                'allow_blank': True,
-            }
-        }
 
     def create(self, validated_data):
         return create_new_position(validated_data)
@@ -352,8 +353,8 @@ class ArchivePositionSerializer(serializers.HyperlinkedModelSerializer):
             'id',
             'url',
             'position',
-            'start_mode',
             'start_time',
+            'start_time_to',
             'memo',
             'address',
             'customer',
@@ -399,6 +400,7 @@ class SettingsSerializer(serializers.HyperlinkedModelSerializer):
 class ContractSerializer(serializers.HyperlinkedModelSerializer):
     positions = ContractPositionSerializer(many=True, default=[])
     repeated = RepeatedSerializer(default=None, allow_null=True)
+    customer = CustomerSerializer(read_only=True)
     # dispo = serializers.HyperlinkedRelatedField(many=True, view_name='dispo-detail', queryset=Dispo.objects.all())
     class Meta:
         model = Contract
@@ -419,19 +421,28 @@ class ContractSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
 
         customer = validated_data.pop('customer', None)
+        print(customer)
         positions = validated_data.pop('positions', [])
         repeated = validated_data.pop('repeated', None)
         dispo = validated_data.pop('dispo', [])
+        if (repeated):
+            contract = RepeatedContract.objects.create(**validated_data, customer = customer)
+            for position in positions:
+                newPosition = create_new_position(position, contract=contract)
 
-        contract = Contract.objects.create(**validated_data, customer = customer)
+            create_new_repeated(repeated, contract=contract)
 
-        for position in positions:
-            newPosition = create_new_position(position, contract=contract)
+            contract.save()
+            return contract
+        else:
+            contract = Contract.objects.create(**validated_data, customer = customer)
 
-        create_new_repeated(repeated, contract=contract)
+            for position in positions:
+                newPosition = create_new_position(position, contract=contract)
 
-        contract.save()
-        return contract
+
+            contract.save()
+            return contract
 
     def update(self, instance, validated_data):
         positions = validated_data.pop('positions', [])

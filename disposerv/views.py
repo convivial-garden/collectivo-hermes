@@ -152,14 +152,13 @@ def fastStreets(request, **kwargs):
 
         if (len(result) == 0):
                 try:
-                    print("get streets from here maps")
                     here_maps_api_key = "Up_vTCjQcg2_WoQK79Dlzj6a_MMliPdfYhO0Cvn3kf4"
                     settings = Settings.objects.first()
                     if (here_maps_api_key == ''):
                             print("ERROR: no here maps api key")
                     else:
                             if (name != ''):
-                                print("get streets from here maps")
+                                print("faststreets: get streets from here maps")
                                 url = "https://geocode.search.hereapi.com/v1/geocode?at="+str(settings.gps_lat)+","+str(settings.gps_lon)+"&q="+name+" "+settings.city+"&lang=de&limit=5&apiKey="+here_maps_api_key
                                 print(url)
                                 data = requests.get(url)
@@ -197,7 +196,7 @@ def totalSales(request, **kwargs):
                 positions__start_time__month=month,
                 positions__start_time__day=day,
                 positions__dispo__preliminary=False,
-                repeated__isnull=True) \
+                ) \
         .distinct().order_by('id')
     price = 0.
     for contract in contracts:

@@ -14,6 +14,10 @@ class Customer(models.Model):
     payment = models.CharField(max_length=10, default='Bar')
     has_delayed_payment = models.BooleanField(default=False)
     has_delayed_payment_memo = models.TextField(blank=True, default='')
+    memo = models.TextField(blank=True)
+    is_blacklisted = models.BooleanField(default=False)
+    is_blacklisted_memo = models.TextField(blank=True, default='')
+
     class Meta:
         ordering = ('added',)
 
@@ -32,6 +36,7 @@ class Address(models.Model):
     postal_code = models.CharField(max_length=6, blank=True)
     talk_to = models.CharField(max_length=400,blank=True, default='')
     talk_to_extra = models.CharField(max_length=400, blank=True, default='')
+    opening_hours = models.CharField(max_length=300, blank=True)
     lat = models.FloatField(null=True, default=48.216618)
     lon = models.FloatField(null=True, default=16.385031)
 
@@ -118,29 +123,25 @@ class Contract(models.Model):
     type = models.CharField(max_length=100, default='einzelfahrt')
     fromrepeated = models.BooleanField(blank=True,default=False)
     repeated_id = models.PositiveIntegerField(blank=True, null=True)
+    repeated_deleted = models.BooleanField(blank=True,default=False, null=True)
 
     def __str__(self):
         return 'Auftragnummer ' + str(self.id)
 
 
-class Repeated(models.Model):
-    contract = models.OneToOneField(Contract, on_delete=models.CASCADE, null=True, related_name='repeated')
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField(null=True)
-    movable_date = models.DateTimeField(null=True, default=None)
-    days_of_the_week = models.CharField(max_length=60, blank=True)
-
-
 
 class ContractPosition(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True, related_name='customer', db_constraint=False)
+    customer= models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True, related_name='customer', db_constraint=False)
+    customer_is_pick_up = models.BooleanField(default=True)
+    customer_is_drop_off = models.BooleanField(default=False)
     contract = models.ForeignKey(Contract, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
     position = models.PositiveIntegerField(default=0)
-    start_mode = models.CharField(max_length=10, default='ab')
-    pickup_time_start = models.DateTimeField(blank=True, null=True)
-    pickup_time_end = models.DateTimeField(blank=True, null=True)
-    pickup_time_at = models.DateTimeField(blank=True, null=True)
-    start_time = models.DateTimeField()
+
+    start_time= models.DateTimeField(blank=True, null=True)
+    start_time_to = models.DateTimeField(blank=True, null=True)
+    end_time_from = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+
     anon_name = models.CharField(max_length=300, default='', blank=True)
 
     weight_size_bonus = models.CharField(max_length=10, default='', blank=True)
@@ -167,6 +168,21 @@ class ContractPosition(models.Model):
             models.Index(fields=['start_time'])
         ]
 
+class RepeatedContractPosition(ContractPosition):
+    pass
+
+# user own models for repeated orders
+class RepeatedContract(Contract):
+    contract = models.ForeignKey(RepeatedContractPosition, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
+    pass
+
+class Repeated(models.Model):
+    contract = models.OneToOneField(RepeatedContract, on_delete=models.CASCADE, null=True, related_name='repeated')
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True)
+    movable_date = models.DateTimeField(null=True, default=None)
+    days_of_the_week = models.CharField(max_length=60, blank=True)
+    notes = models.TextField(blank=True)
 
 class Dispo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
