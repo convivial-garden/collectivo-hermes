@@ -17,7 +17,7 @@ services:
       sh -c "while ! nc -z collectivo-db 5432; do sleep 1; done &&
              while ! nc -z keycloak 8080; do sleep 1; done &&
              python manage.py migrate &&
-             gunicorn collectivo_app.wsgi:application --bind 0.0.0.0:8000
+             python manage.py runserver 0.0.0.0:8000
              "
     environment:
       DB_HOST: collectivo-db

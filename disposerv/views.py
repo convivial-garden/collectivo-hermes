@@ -34,9 +34,10 @@ def is_number(s):
 
 from rest_framework import viewsets, generics
 from .models import \
-    Address, \
+    PositionAddress, \
     Customer, \
     ContractPosition, \
+    RepeatedContract, \
     Street, \
     Contract, \
     Dispo, \
@@ -47,6 +48,7 @@ from .serializers import \
     AddressSerializer, \
     CustomerSerializer, \
     ContractPositionSerializer, \
+    ContractGetSerializer, \
     StreetSerializer, \
     ContractSerializer, \
     ArchiveContractSerializer, \
@@ -69,7 +71,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class AddressViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
-    queryset = Address.objects.all().order_by('street')
+    queryset = PositionAddress.objects.all().order_by('street')
     serializer_class = AddressSerializer
     permission_classes = [IsSuperuser]
 
@@ -129,7 +131,9 @@ class DelayedPaymentView(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class ContractViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Contract.objects.all().order_by('id')
-    serializer_class = ContractSerializer
+    def get_serializer_class(self):
+        print(self.action)
+        return ContractSerializer
     permission_classes = [IsSuperuser]
 
 
@@ -335,7 +339,6 @@ class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
         if (customerId != ''):
             archive_kwargs['positions__customer__id'] = customerId
 
-        archive_kwargs['repeated__isnull'] = True
 
         assigned_contracts_ids = Contract.objects.filter(positions__position__gte=1, positions__dispo__isnull=False).distinct().order_by('id')
 
@@ -346,7 +349,9 @@ class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
         return response
 
 class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
-    serializer_class = ContractSerializer
+    def get_serializer_class(self):
+        print(self)
+        return ContractSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsSuperuser]
 
@@ -359,7 +364,6 @@ class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
         tomorrow = tomorrow.replace(tzinfo=pytz.UTC)
         archive_kwargs = {}
         archive_kwargs['positions__start_time__gt'] = tomorrow
-        archive_kwargs['repeated__isnull'] = True
         archive_kwargs['fromrepeated'] = False
 
         return Contract.objects \
@@ -368,7 +372,8 @@ class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 
 
 class ContractsByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
-    serializer_class = ContractSerializer
+    def get_serializer_class(self):
+        return ContractGetSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsSuperuser]
     def get_queryset(self):
@@ -441,9 +446,8 @@ class RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
 
     def get_queryset(self):
         weekday = self.kwargs.get('weekday', '')
-        return Contract.objects \
+        return RepeatedContract.objects \
             .filter((Q(repeated__end_date__gte=timezone.now()) | Q(repeated__end_date__isnull=True)),
-                    repeated__isnull=False,
                     repeated__days_of_the_week__icontains=weekday) \
             .distinct().order_by('id')
 
@@ -457,7 +461,6 @@ class TerminatedRepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIVie
         return Contract.objects \
             .filter(repeated__end_date__isnull=False,
                     repeated__end_date__lt=timezone.now(),
-                    repeated__isnull=False,
                     repeated__days_of_the_week__icontains=weekday) \
             .distinct().order_by('id')
 

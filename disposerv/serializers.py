@@ -1,7 +1,8 @@
 from rest_framework import serializers
 import requests
 from .models import \
-    Address, \
+    PositionAddress, \
+    RepeatedPositionAddress, \
     Customer, \
     ContractPosition, \
     RepeatedContractPosition, \
@@ -41,14 +42,46 @@ def create_new_position(validated_data, **kwargs):
         else:
             print("createnewposition: get streets from here maps")
             url = "https://geocode.search.hereapi.com/v1/geocode?at="+str(settings.gps_lat)+","+str(settings.gps_lon)+"&q="+address.get('street')+" "+address.get('number')+" "+address.get('postal_code')+"&lang=de&limit=5&apiKey="+here_maps_api_key
-            print(url)
             data = requests.get(url)
             items = data.json()['items']
             if (len(items) > 0):
                 position.lat = items[0]['position']['lat']
                 position.lon = items[0]['position']['lng']
                 StreetWithNumber.objects.create(name=address.get('street'), nr=address.get('number'), postal_code=address.get('postal_code'), lat=position.lat, lon=position.lon)
-    Address.objects.create(**address, position=position)
+    PositionAddress.objects.create(**address, position=position)
+    return position
+
+def create_new_repeated_position(validated_data, **kwargs):
+    contract = kwargs.get('contract', 'null')
+    address_data = validated_data.pop('address')
+    customer = validated_data.pop('new_customer')
+
+    position = RepeatedContractPosition.objects.create(**validated_data, contract = contract, customer = customer)
+
+    address = address_data[0]
+    address.pop('position', 'null')
+    # set lat and lon
+    streetWithNumber = StreetWithNumber.objects.filter(name=address.get('street'), nr=address.get('number'), postal_code=address.get('postal_code'))
+    if (streetWithNumber):
+        position.lat = streetWithNumber[0].lat
+        position.lon = streetWithNumber[0].lon
+    elif address.get('street') == "":
+        print("no street")
+    else:
+        here_maps_api_key = "Up_vTCjQcg2_WoQK79Dlzj6a_MMliPdfYhO0Cvn3kf4"
+        settings = Settings.objects.first()
+        if (here_maps_api_key == ''):
+                print("ERROR: no here maps api key")
+        else:
+            print("createnewposition: get streets from here maps")
+            url = "https://geocode.search.hereapi.com/v1/geocode?at="+str(settings.gps_lat)+","+str(settings.gps_lon)+"&q="+address.get('street')+" "+address.get('number')+" "+address.get('postal_code')+"&lang=de&limit=5&apiKey="+here_maps_api_key
+            data = requests.get(url)
+            items = data.json()['items']
+            if (len(items) > 0):
+                position.lat = items[0]['position']['lat']
+                position.lon = items[0]['position']['lng']
+                StreetWithNumber.objects.create(name=address.get('street'), nr=address.get('number'), postal_code=address.get('postal_code'), lat=position.lat, lon=position.lon)
+    RepeatedPositionAddress.objects.create(**address, position=position)
     return position
 
 def create_new_repeated(validated_data, **kwargs):
@@ -206,7 +239,7 @@ class FullTimesRecordSerializer(serializers.HyperlinkedModelSerializer):
 class AddressSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     class Meta:
-        model = Address
+        model = PositionAddress
         fields = ('id', 'url', 'street', 'number', 'stair', 'level', 'door', 'extra', 'postal_code', 'customer', 'position', 'lat', 'lon', 'talk_to', 'talk_to_extra')
 
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
@@ -222,7 +255,6 @@ class CustomerSerializer(serializers.HyperlinkedModelSerializer):
         for address_data in addresses_data:
             address_data.pop("customer", "") # better save than sorry
             # check if street exists
-            print(address_data)
             streetWithNumber = StreetWithNumber.objects.filter(name=address_data.get('street'), nr=address_data.get('number'), postal_code=address_data.get('postal_code'))
             if (streetWithNumber):
                 address_data['lat'] = streetWithNumber[0].lat
@@ -235,7 +267,6 @@ class CustomerSerializer(serializers.HyperlinkedModelSerializer):
                     else:
                         print("CustomerSerializer: get streets from here maps")
                         url = "https://geocode.search.hereapi.com/v1/geocode?at="+str(settings.gps_lat)+","+str(settings.gps_lon)+"&q="+address_data.get('street')+" "+address_data.get('number')+" "+address_data.get('postal_code')+"&lang=de&limit=5&apiKey="+here_maps_api_key
-                        print(url)
                         data = requests.get(url)
                         items = data.json()['items']
                         if (len(items) > 0):
@@ -243,7 +274,7 @@ class CustomerSerializer(serializers.HyperlinkedModelSerializer):
                             address_data['lon'] = items[0]['position']['lng']
                             StreetWithNumber.objects.create(name=address_data.get('street'), nr=address_data.get('number'), postal_code=address_data.get('postal_code'), lat=address_data['lat'], lon=address_data['lon'])
 
-            Address.objects.update_or_create(customer=customer, **address_data)
+            PositionAddress.objects.update_or_create(customer=customer, **address_data)
         return customer
 
     def update(self, instance, validated_data):
@@ -270,7 +301,7 @@ class CustomerSerializer(serializers.HyperlinkedModelSerializer):
         for further_address_data in addresses:
             if "customer" in address_data:
                 address_data.pop("customer")
-            Address.objects.create(customer=instance, **further_address_data)
+            PositionAddress.objects.create(customer=instance, **further_address_data)
         return instance
 
 class DelayedPaymentSerializer(serializers.HyperlinkedModelSerializer):
@@ -396,12 +427,29 @@ class SettingsSerializer(serializers.HyperlinkedModelSerializer):
         model = Settings
         fields = "__all__"
 
-
+class ContractGetSerializer(serializers.HyperlinkedModelSerializer):
+    positions = ContractPositionSerializer(many=True, default=[])
+    repeated = RepeatedSerializer(default=None, allow_null=True)
+    customer = CustomerSerializer(default=None, allow_null=True)
+    class Meta:
+        model = Contract
+        fields = ('id',
+                  'url',
+                  'created',
+                  'zone',
+                  'distance',
+                  'price',
+                  'extra',
+                  'customer',
+                  'positions',
+                  'type',
+                  'repeated',
+                  'fromrepeated'
+                    )
+        
 class ContractSerializer(serializers.HyperlinkedModelSerializer):
     positions = ContractPositionSerializer(many=True, default=[])
     repeated = RepeatedSerializer(default=None, allow_null=True)
-    customer = CustomerSerializer(read_only=True)
-    # dispo = serializers.HyperlinkedRelatedField(many=True, view_name='dispo-detail', queryset=Dispo.objects.all())
     class Meta:
         model = Contract
         fields = ('id',
@@ -419,7 +467,6 @@ class ContractSerializer(serializers.HyperlinkedModelSerializer):
                     )
 
     def create(self, validated_data):
-
         customer = validated_data.pop('customer', None)
         print(customer)
         positions = validated_data.pop('positions', [])
@@ -428,7 +475,7 @@ class ContractSerializer(serializers.HyperlinkedModelSerializer):
         if (repeated):
             contract = RepeatedContract.objects.create(**validated_data, customer = customer)
             for position in positions:
-                newPosition = create_new_position(position, contract=contract)
+                newPosition = create_new_repeated_position(position, contract=contract)
 
             create_new_repeated(repeated, contract=contract)
 

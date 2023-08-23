@@ -26,7 +26,6 @@ class Customer(models.Model):
 
 class Address(models.Model):
     customer = models.ForeignKey(Customer, related_name="addresses",on_delete=models.SET_NULL, null=True, blank=True)
-    position = models.ForeignKey('ContractPosition', related_name="address",on_delete=models.SET_NULL, null=True, blank=True)
     street = models.CharField(max_length=300, default='', blank=True)
     number = models.CharField(max_length=10, blank=True)
     stair = models.CharField(max_length=10, blank=True)
@@ -42,6 +41,12 @@ class Address(models.Model):
 
     def __str__(self):
         return self.street + ' ' + self.number
+class PositionAddress(Address):
+    position = models.ForeignKey('ContractPosition', related_name="address",on_delete=models.SET_NULL, null=True, blank=True)
+    pass
+class RepeatedPositionAddress(Address):
+    position = models.ForeignKey('RepeatedContractPosition', related_name="address",on_delete=models.SET_NULL, null=True, blank=True)
+    pass
 
 class Street(models.Model):
     name = models.CharField(max_length=400, default='')
@@ -70,8 +75,14 @@ class StreetWithNumber(models.Model):
                 fields=['name', 'nr'])
         ]
 class AddressPosition(models.Model):
-    address = models.ForeignKey(Address, related_name="positions",on_delete=models.SET_NULL, null=True, blank=True)
+    address = models.ForeignKey(PositionAddress, related_name="positions",on_delete=models.SET_NULL, null=True, blank=True)
     position = models.ForeignKey('ContractPosition', related_name="addressposition",on_delete=models.SET_NULL, null=True, blank=True)
+    lat = models.FloatField(null=True, default=48.216618)
+    lon = models.FloatField(null=True, default=16.385031)
+
+class AddressReapeatedPosition(models.Model):
+    address = models.ForeignKey(RepeatedPositionAddress, related_name="positions",on_delete=models.SET_NULL, null=True, blank=True)
+    position = models.ForeignKey('RepeatedContractPosition', related_name="addressposition",on_delete=models.SET_NULL, null=True, blank=True)
     lat = models.FloatField(null=True, default=48.216618)
     lon = models.FloatField(null=True, default=16.385031)
 
@@ -93,7 +104,6 @@ class Staff(models.Model):
         return str(self.user)
     
     def find_or_create_user(sender, instance, **kwargs):
-        print(instance)
         staff, created = Staff.objects.update_or_create(user=instance)
         if created:
             Staff.objects.create(user=instance)
@@ -130,11 +140,11 @@ class Contract(models.Model):
 
 
 
-class ContractPosition(models.Model):
+
+class Position(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True, related_name='customer', db_constraint=False)
     customer_is_pick_up = models.BooleanField(default=True)
     customer_is_drop_off = models.BooleanField(default=False)
-    contract = models.ForeignKey(Contract, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
     position = models.PositiveIntegerField(default=0)
 
     start_time= models.DateTimeField(blank=True, null=True)
@@ -167,14 +177,28 @@ class ContractPosition(models.Model):
         indexes = [
             models.Index(fields=['start_time'])
         ]
+class RepeatedContract(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True, db_constraint=False)
+    zone = models.PositiveIntegerField(blank=True, null=True)
+    distance = models.FloatField(blank=True, null=True)
+    price = models.FloatField(blank=True, null=True)
+    extra = models.FloatField(null=True)
+    type = models.CharField(max_length=100, default='einzelfahrt')
+    fromrepeated = models.BooleanField(blank=True,default=False)
+    repeated_id = models.PositiveIntegerField(blank=True, null=True)
+    repeated_deleted = models.BooleanField(blank=True,default=False, null=True)
 
-class RepeatedContractPosition(ContractPosition):
+class ContractPosition(Position):
+    contract = models.ForeignKey(Contract, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
+    pass
+
+class RepeatedContractPosition(Position):
+    contract = models.ForeignKey(RepeatedContract, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
     pass
 
 # user own models for repeated orders
-class RepeatedContract(Contract):
-    contract = models.ForeignKey(RepeatedContractPosition, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
-    pass
+
 
 class Repeated(models.Model):
     contract = models.OneToOneField(RepeatedContract, on_delete=models.CASCADE, null=True, related_name='repeated')
@@ -206,7 +230,6 @@ class Settings(models.Model):
 def update_disposerv_user(sender, instance, created, **kwargs):
     """Create or update related keycloak user when a django user is changed."""
     print("update_disposerv_user")
-    print(instance)
     Staff.find_or_create_user(sender, instance)
 
 
