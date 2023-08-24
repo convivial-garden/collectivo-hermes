@@ -216,6 +216,7 @@ services:
       retries: 15
     volumes:
       - ./docker/keycloak/import:/opt/keycloak/data/import:ro
+      - ./docker/keycloak/themes/hermes:/opt/keycloak/themes/hermes:ro
       - ./docker/keycloak/export:/tmp/export
       - ./docker/keycloak/healthcheck.sh:/healthcheck.sh
     command: start-dev --import-realm

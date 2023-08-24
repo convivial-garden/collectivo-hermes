@@ -58,7 +58,8 @@ from .serializers import \
     StaffNamesSerializer, \
     DelayedPaymentSerializer, \
     FullTimesRecordSerializer, \
-    SettingsSerializer
+    SettingsSerializer, \
+    RepeatedContractSerializer
 
 #
 class StandardResultsSetPagination(PageNumberPagination):
@@ -170,7 +171,7 @@ def fastStreets(request, **kwargs):
                                 for element in items:
                                     # print(element)
                                     if element['resultType'] == 'street' and element['distance']<50000:
-                                        print("street")
+                                        print("street", element['title'])
                                         name = element['address']['street']
                                         postal_code = "0000"
                                         if 'postalCode' in element['address']:
@@ -296,7 +297,18 @@ class TimesByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
                     start_datetime__month=month,
                     start_datetime__day=day) \
             .distinct().order_by('id')
-
+class TimesByMonthList(HistoryMixin, SchemaMixin, generics.ListAPIView):
+    serializer_class = FullTimesRecordSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [IsSuperuser]
+    def get_queryset(self):
+        year = self.kwargs['year']
+        month = self.kwargs['month']
+        return TimesRecord.objects \
+            .filter(start_datetime__year=year,
+                    start_datetime__month=month) \
+            .distinct().order_by('id')
+    
 class StaffNames(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = StaffNamesSerializer
     permission_classes = [IsSuperuser]
@@ -349,8 +361,7 @@ class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
         return response
 
 class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
-    def get_serializer_class(self):
-        return ContractGetSerializer
+    serializer_class =ContractGetSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsSuperuser]
 
@@ -359,15 +370,19 @@ class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
         View returns all contracts except if theres a date parameter in the url
         :return:
         """
-        tomorrow = datetime.datetime.today() + datetime.timedelta(days=1)
-        tomorrow = tomorrow.replace(tzinfo=pytz.UTC)
+        tz = pytz.timezone('Europe/Vienna')
+        today = datetime.datetime.now(tz=tz)
+        start = today.replace(hour=23, minute=0, second=0, microsecond=0)
         archive_kwargs = {}
-        archive_kwargs['positions__start_time__gt'] = tomorrow
+        archive_kwargs['positions__start_time__gt'] = start
 
         return Contract.objects \
             .filter(**archive_kwargs) \
             .distinct().order_by('id')
-
+class  RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
+    serializer_class = RepeatedContractSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [IsSuperuser]
 
 class ContractsByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     def get_serializer_class(self):
@@ -438,7 +453,7 @@ class ContractsSelfByDateList(ContractsByDateList):
             .order_by('id') \
             .distinct()
 class RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
-    serializer_class = ContractSerializer
+    serializer_class = RepeatedContractSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsSuperuser]
 
@@ -478,6 +493,7 @@ class CustomerViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
 
 class SettingsViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     queryset = Settings.objects.all().order_by('id')
+    print("getSettings")
     if (len(queryset) == 0):
         print("disposerv: create settings")
         Settings.objects.create()

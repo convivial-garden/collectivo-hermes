@@ -24,7 +24,7 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
-class Address(models.Model):
+class GenericAddress(models.Model):
     customer = models.ForeignKey(Customer, related_name="addresses",on_delete=models.SET_NULL, null=True, blank=True)
     street = models.CharField(max_length=300, default='', blank=True)
     number = models.CharField(max_length=10, blank=True)
@@ -41,10 +41,10 @@ class Address(models.Model):
 
     def __str__(self):
         return self.street + ' ' + self.number
-class PositionAddress(Address):
+class PositionAddress(GenericAddress):
     position = models.ForeignKey('ContractPosition', related_name="address",on_delete=models.SET_NULL, null=True, blank=True)
     pass
-class RepeatedPositionAddress(Address):
+class RepeatedPositionAddress(GenericAddress):
     position = models.ForeignKey('RepeatedContractPosition', related_name="address",on_delete=models.SET_NULL, null=True, blank=True)
     pass
 
@@ -138,10 +138,7 @@ class Contract(models.Model):
     def __str__(self):
         return 'Auftragnummer ' + str(self.id)
 
-
-
-
-class Position(models.Model):
+class GenericPosition(models.Model):
     customer= models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True, related_name='customer', db_constraint=False)
     customer_is_pick_up = models.BooleanField(default=True)
     customer_is_drop_off = models.BooleanField(default=False)
@@ -189,11 +186,11 @@ class RepeatedContract(models.Model):
     repeated_id = models.PositiveIntegerField(blank=True, null=True)
     repeated_deleted = models.BooleanField(blank=True,default=False, null=True)
 
-class ContractPosition(Position):
+class ContractPosition(GenericPosition):
     contract = models.ForeignKey(Contract, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
     pass
 
-class RepeatedContractPosition(Position):
+class RepeatedContractPosition(GenericPosition):
     contract = models.ForeignKey(RepeatedContract, related_name='positions', on_delete=models.CASCADE, blank=True, null=True)
     pass
 
@@ -204,9 +201,16 @@ class Repeated(models.Model):
     contract = models.OneToOneField(RepeatedContract, on_delete=models.CASCADE, null=True, related_name='repeated')
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True)
-    movable_date = models.DateTimeField(null=True, default=None)
     days_of_the_week = models.CharField(max_length=60, blank=True)
     notes = models.TextField(blank=True)
+
+class RepeatedContractForDate(models.Model):
+    repeated = models.ForeignKey(Repeated, on_delete=models.SET_NULL, null=True, related_name='repeatedcontracts')
+    date = models.DateTimeField()
+    contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True, related_name='repeatedcontracts')
+    created = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+    changed = models.BooleanField(default=False)
 
 class Dispo(models.Model):
     created = models.DateTimeField(auto_now_add=True)

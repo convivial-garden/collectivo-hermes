@@ -242,6 +242,13 @@ class AddressSerializer(serializers.HyperlinkedModelSerializer):
         model = PositionAddress
         fields = ('id', 'url', 'street', 'number', 'stair', 'level', 'door', 'extra', 'postal_code', 'customer', 'position', 'lat', 'lon', 'talk_to', 'talk_to_extra')
 
+class RepeatedAddressSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = RepeatedPositionAddress
+        fields = ('id', 'street', 'number', 'stair', 'level', 'door', 'extra', 'postal_code', 'customer', #'position', 
+                  'lat', 'lon', 'talk_to', 'talk_to_extra')
+
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
     addresses = AddressSerializer(many=True, default=[])
     class Meta:
@@ -353,6 +360,47 @@ class ContractPositionSerializer(serializers.HyperlinkedModelSerializer):
         instance.save()
         return instance
 
+class RepeatedContractPositionSerializer(serializers.HyperlinkedModelSerializer):
+    address = RepeatedAddressSerializer(many=True, default=[])
+    customer = CustomerSerializer(read_only=True)
+    new_customer = serializers.HyperlinkedRelatedField(view_name = 'customer-detail', write_only=True, queryset=Customer.objects.all(), allow_null=True)
+    class Meta:
+        model = RepeatedContractPosition
+        fields = (
+            'id',
+            'position',
+            'start_time',
+            'start_time_to',
+            'memo',
+            'address',
+            'customer',
+            'customer_is_pick_up',
+            'customer_is_drop_off',
+            'new_customer',
+            'anon_name',
+            'weight_size_bonus',
+            'distance',
+            'zone',
+            'is_cargo',
+            'is_express',
+            'is_bigbuilding',
+            'get_there_bonus',
+            'waiting_bonus',
+            'price',
+            'bonus',
+            'phone_1',
+            'email',
+            'talk_to'
+        )
+
+    def create(self, validated_data):
+        return create_new_position(validated_data)
+
+    def update(self, instance, validated_data):
+        instance = update_position(instance, validated_data)
+        instance.save()
+        return instance
+
 
 class StreetSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -366,7 +414,7 @@ class StreetSerializer(serializers.Serializer):
 class RepeatedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Repeated
-        fields = ('contract', 'start_date', 'end_date', 'movable_date', 'days_of_the_week')
+        fields = ('contract', 'start_date', 'end_date',  'days_of_the_week')
 
 class ArchiveDispoSerializer(serializers.ModelSerializer):
     dispatched_to = StaffNamesSerializer(read_only=True)
@@ -444,7 +492,8 @@ class ContractGetSerializer(serializers.HyperlinkedModelSerializer):
                   'positions',
                   'type',
                   'repeated',
-                  'fromrepeated'
+                  'fromrepeated',
+                  'repeated_id'
                     )
         
 class ContractSerializer(serializers.HyperlinkedModelSerializer):
@@ -519,3 +568,50 @@ class ContractSerializer(serializers.HyperlinkedModelSerializer):
             create_new_position(further_position_data, contract=instance)
 
         return instance
+    
+class RepeatedContractSerializer(serializers.HyperlinkedModelSerializer):
+    positions = RepeatedContractPositionSerializer(many=True, default=[])
+    repeated = RepeatedSerializer(default=None, allow_null=True)
+    customer = CustomerSerializer(default=None, allow_null=True)
+    class Meta:
+        model = RepeatedContract
+        fields = ('id',
+                  'created',
+                  'zone',
+                  'distance',
+                  'price',
+                  'extra',
+                  'customer',
+                  'positions',
+                  'type',
+                  'repeated'
+                    )
+
+    # def update(self, instance, validated_data):
+    #     positions = validated_data.pop('positions', [])
+
+    #     instance.zone = validated_data.get('zone', instance.zone)
+    #     instance.distance = validated_data.get('distance', instance.distance)
+    #     instance.price = validated_data.get('price', instance.price)
+    #     instance.extra = validated_data.get('extra', instance.extra)
+    #     instance.customer = validated_data.get('customer', instance.customer)
+    #     instance.type = validated_data.get('type', instance.type)
+    #     instance.save()
+
+    #     if hasattr(instance, 'repeated'):
+    #         repeated_instance = update_repeated(instance.repeated, validated_data)
+    #     elif (validated_data.get('repeated')):
+    #         Repeated.objects.create(**validated_data.get('repeated'), contract=instance)
+
+    #     for instance_position in instance.positions.all():
+    #         try:
+    #             position_data = positions.pop(0)
+    #             instance_position = update_position(instance_position, position_data)
+    #             instance_position.save()
+    #         except IndexError:
+    #             pass
+
+    #     for further_position_data in positions:
+    #         create_new_position(further_position_data, contract=instance)
+
+    #     return instance
