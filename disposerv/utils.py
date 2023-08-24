@@ -5,7 +5,7 @@ from celery import shared_task
 
 from django.http import HttpResponse
 
-from .models import Contract
+from .models import Contract, RepeatedContract
 
 WEEKDAYS = {
     0 : 'Monday'   ,
@@ -26,12 +26,11 @@ def generateRepeatedContracts(req):
     logger.debug("DEBUG ----------- generateRepeatedContracts ---------------")
     logger.debug("###########################################################")
 
-    repeated_contracts = Contract.objects \
+    repeated_contracts = RepeatedContract.objects \
             .filter(
         Q(repeated__end_date__gt=timezone.now()) | Q(repeated__end_date__isnull=True),
         Q(repeated__movable_date__lt=timezone.now()) | Q(repeated__movable_date__isnull=True),
-            repeated__start_date__lt=timezone.now(),
-            repeated__isnull=False).order_by('id')
+            repeated__start_date__lt=timezone.now()).order_by('id')
 
     for contract in repeated_contracts:
         logger.debug("Contract ID {}".formxat(contract.id))

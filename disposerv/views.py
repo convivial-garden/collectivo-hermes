@@ -350,8 +350,7 @@ class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 
 class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     def get_serializer_class(self):
-        print(self)
-        return ContractSerializer
+        return ContractGetSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsSuperuser]
 
@@ -364,7 +363,6 @@ class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
         tomorrow = tomorrow.replace(tzinfo=pytz.UTC)
         archive_kwargs = {}
         archive_kwargs['positions__start_time__gt'] = tomorrow
-        archive_kwargs['fromrepeated'] = False
 
         return Contract.objects \
             .filter(**archive_kwargs) \

@@ -98,6 +98,8 @@ services:
     depends_on:
       - collectivo
       - redis
+    links:
+      - collectivo-db
 
   # A celery worker that runs in the background and processes the scheduled tasks.
   celery-beat:
@@ -139,6 +141,8 @@ services:
     depends_on:
       - collectivo
       - redis
+    links:
+      - collectivo-db
 
   # A communication broker for celery.
   redis:
