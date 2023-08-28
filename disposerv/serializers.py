@@ -102,6 +102,7 @@ def update_instance_address(instance_address, address_data):
     instance_address.postal_code = address_data.get('postal_code', instance_address.postal_code)
     instance_address.lat = address_data.get('lat', instance_address.lat)
     instance_address.lon = address_data.get('lon', instance_address.lon)
+    instance_address.opening_hours = address_data.get('opening_hours', instance_address.opening_hours)
     return instance_address
 
 def update_position_instance(instance, validated_data):
@@ -240,14 +241,14 @@ class AddressSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     class Meta:
         model = PositionAddress
-        fields = ('id', 'url', 'street', 'number', 'stair', 'level', 'door', 'extra', 'postal_code', 'customer', 'position', 'lat', 'lon', 'talk_to', 'talk_to_extra')
+        fields = ('id', 'url', 'street', 'number', 'stair', 'level', 'door', 'extra', 'postal_code', 'customer', 'position', 'lat', 'lon', 'talk_to', 'talk_to_extra', 'opening_hours')
 
 class RepeatedAddressSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     class Meta:
         model = RepeatedPositionAddress
         fields = ('id', 'street', 'number', 'stair', 'level', 'door', 'extra', 'postal_code', 'customer', #'position', 
-                  'lat', 'lon', 'talk_to', 'talk_to_extra')
+                  'lat', 'lon', 'talk_to', 'talk_to_extra', 'opening_hours')
 
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
     addresses = AddressSerializer(many=True, default=[])
@@ -404,9 +405,7 @@ class RepeatedContractPositionSerializer(serializers.HyperlinkedModelSerializer)
 
 class StreetSerializer(serializers.Serializer):
     name = serializers.CharField()
-    name_street = serializers.CharField()
-    nr_von = serializers.CharField()
-    nr_bis = serializers.CharField()
+    nr = serializers.CharField()
     lon = serializers.FloatField()
     lat = serializers.FloatField()
     postal_code = serializers.CharField()

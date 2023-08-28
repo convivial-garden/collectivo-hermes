@@ -41,6 +41,7 @@ from .models import \
     Street, \
     Contract, \
     Dispo, \
+    StreetWithNumber, \
     TimesRecord, \
     Staff, \
     Settings
@@ -115,7 +116,7 @@ class StreetViewSet(HistoryMixin, SchemaMixin, generics.ListAPIView):
                 for part in name.split(' '):
                     result = result.filter(name__icontains=part)
                     if (is_number(part) and (not checked_for_a_number)):
-                        result = result.filter(nr_von__exact=part)
+                        result = result.filter(nr__exact=part)
                         checked_for_a_number = True
             except:
                 print("ERROR")
@@ -145,10 +146,10 @@ def fastStreets(request, **kwargs):
     if (name != '' and len(name) > 3):
         try:
             name_split = name.split(' ')
-            result = Street.objects.filter(name__istartswith=name_split[0])
+            result = StreetWithNumber.objects.filter(name__istartswith=name_split[0])
             for part in name_split:
                 if (is_number(part)):
-                    result = result.filter(nr_von__iexact=part)
+                    result = result.filter(nr__iexact=part)
                 else:
                     result = result.filter(name__icontains=part)
             result = result.distinct()
@@ -170,16 +171,19 @@ def fastStreets(request, **kwargs):
                                 items = data.json()['items']
                                 for element in items:
                                     # print(element)
-                                    if element['resultType'] == 'street' and element['distance']<50000:
+                                    if element['resultType'] == 'street' and element['distance']<50000 or element['resultType'] == 'houseNumber':
                                         print("street", element['title'])
                                         name = element['address']['street']
+                                        nr = "-1"
+                                        if 'houseNumber' in element['address']:
+                                            nr = element['address']['houseNumber']
+                                        print(nr)
                                         postal_code = "0000"
                                         if 'postalCode' in element['address']:
                                             postal_code = element['address']['postalCode']
 
-                                        street = Street.objects.update_or_create(name=name,name_street=name, 
-                                                                       nr_von=0, 
-                                                                       nr_bis=0, 
+                                        street = StreetWithNumber.objects.update_or_create(name=name, 
+                                                                        nr = nr,
                                                                        postal_code=postal_code,
                                                                        lat= element['position']['lat'],
                                                                          lon= element['position']['lng'],  )
@@ -188,7 +192,12 @@ def fastStreets(request, **kwargs):
                     print("ERROR: failed to query here maps", error)
         else:
             for (index, res) in enumerate(result.values()):
-                results.append({"value": str(index), "label": res['name']+" "+res['postal_code'], "data": res})
+                label = res['name']+" "+res['nr'] + " "+res['postal_code']
+                print(res['nr'])
+                if (res['nr'] == "-1"):
+                    label = res['name'] + " "+res['postal_code']
+                results.append({"value": str(index), "label":label, "data": res})
+    print(results)
     return JsonResponse(results, safe=False)
 
 

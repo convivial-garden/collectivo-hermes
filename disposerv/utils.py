@@ -41,7 +41,7 @@ def generateRepeatedContracts(req):
             logger.debug("generating contracts until end of week")
             current_date = datetime.today().replace(tzinfo=pytz.UTC)
             logger.debug("start date {}".format(current_date))
-            one_past_end_date = current_date + timedelta(days=(7))
+            one_past_end_date = current_date + timedelta(days=(9 ))
             logger.debug("one past end date {}".format(one_past_end_date))
             while current_date != one_past_end_date:
                 logger.debug("days of the week {}".format(contract.repeated.days_of_the_week))
