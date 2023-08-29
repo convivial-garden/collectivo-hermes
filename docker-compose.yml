@@ -20,6 +20,7 @@ services:
     restart: always
     environment:
       VIRTUAL_HOST: ${HERMES_FRONTEND_URL_BASE}
+      SELF_SIGNED_HOST: ${HERMES_FRONTEND_URL_BASE}
       VIRTUAL_PORT: 80
   collectivo:
     restart: always
