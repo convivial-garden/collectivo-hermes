@@ -57,7 +57,7 @@ services:
       CELERY_BACKEND: ${REDIS_URL}
       VIRTUAL_HOST: ${COLLECTIVO_URL_BASE}
       VIRTUAL_PORT: 8000
-      LETSENCRYPT_HOST: ${COLLECTIVO_URL_BASE}
+      SELF_SIGNED_HOST: ${COLLECTIVO_URL_BASE}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
       ADMIN_USER: ${COLLECTIVO_ADMIN_USER}
       ADMIN_PASS: ${COLLECTIVO_ADMIN_PASS}
@@ -104,7 +104,7 @@ services:
       CELERY_BACKEND: ${REDIS_URL}
       VIRTUAL_HOST: ${COLLECTIVO_URL_BASE}
       VIRTUAL_PORT: 8000
-      LETSENCRYPT_HOST: ${COLLECTIVO_URL_BASE}
+      SELF_SIGNED_HOST: ${COLLECTIVO_URL_BASE}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     labels:
       io.portainer.accesscontrol.teams: ${PORTAINER_TEAM_ID}
@@ -145,7 +145,7 @@ services:
       CELERY_BACKEND: ${REDIS_URL}
       VIRTUAL_HOST: ${COLLECTIVO_URL_BASE}
       VIRTUAL_PORT: 8000
-      LETSENCRYPT_HOST: ${COLLECTIVO_URL_BASE}
+      SELF_SIGNED_HOST: ${COLLECTIVO_URL_BASE}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     labels:
       io.portainer.accesscontrol.teams: ${PORTAINER_TEAM_ID}
@@ -191,7 +191,7 @@ services:
     environment:
       VIRTUAL_HOST: ${COLLECTIVO_UX_URL_BASE}
       VIRTUAL_PORT: 80
-      LETSENCRYPT_HOST: ${COLLECTIVO_UX_URL_BASE}
+      SELF_SIGNED_HOST: ${COLLECTIVO_UX_URL_BASE}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
       VITE_API_URL: ${COLLECTIVO_URL}
       VITE_KEYCLOAK_URL: ${KEYCLOAK_URL}
@@ -229,20 +229,13 @@ services:
       KC_HOSTNAME: ${KEYCLOAK_URL_BASE}
       VIRTUAL_HOST: ${KEYCLOAK_URL_BASE}
       VIRTUAL_PORT: 8080
-      LETSENCRYPT_HOST: ${KEYCLOAK_URL_BASE}
+      SELF_SIGNED_HOST: ${KEYCLOAK_URL_BASE}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8080/realms/master"]
-      interval: 5s
-      timeout: 2s
-      retries: 15
     volumes:
       - ./docker/keycloak/import:/opt/keycloak/data/import:ro
       - ./docker/keycloak/themes/hermes:/opt/keycloak/themes/hermes:ro
       - ./docker/keycloak/export:/tmp/export
       - ./docker/keycloak/imported/:/opt/keycloak/imported/
-    ports:
-      - "8080:8080"
     labels:
       io.portainer.accesscontrol.teams: ${PORTAINER_TEAM_ID}
 
