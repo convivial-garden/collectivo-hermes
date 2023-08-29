@@ -39,7 +39,7 @@ urlpatterns = [
     re_path(r'^api/hermes/disposerv/preorders/$', views.PreordersList.as_view()),
     re_path(r'^api/hermes/disposerv/payments/$', views.DelayedPaymentView.as_view()),
     re_path(r'^api/hermes/disposerv/anon/$', views.getAnon),
-    re_path(r'^api/hermes/disposerv/contracts/rider/self/(?P<year>.+)/(?P<month>.+)/(?P<day>.+)/$', views.ContractsSelfByDateList.as_view()),
+    re_path(r'^api/hermes/disposerv/contracts/self/(?P<year>.+)/(?P<month>.+)/(?P<day>.+)/$', views.ContractsSelfByDateList.as_view()),
     re_path(r'^api/hermes/disposerv/contracts/rider/(?P<year>.+)/(?P<month>.+)/(?P<day>.+)/(?P<rider>.+)/$', views.ContractsByDateList.as_view()),
     re_path(r'^api/hermes/disposerv/repeatedall', views.RepeatedContracts.as_view()),
     re_path(r'^api/hermes/disposerv/repeated/(?P<weekday>.+)/$', views.RepeatedContracts.as_view()),
