@@ -67,7 +67,8 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = 'page_size'
     max_page_size = 1000
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 
@@ -75,34 +76,39 @@ class AddressViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = PositionAddress.objects.all().order_by('street')
     serializer_class = AddressSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class DispoViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Dispo.objects.all().order_by('id')
     serializer_class = DispoSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class TimesRecordViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = TimesRecord.objects.all().order_by('id')
     serializer_class = TimesRecordSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class StaffViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Staff.objects.all().order_by('user__id')
     serializer_class = StaffSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class StreetViewSet(HistoryMixin, SchemaMixin, generics.ListAPIView):
     pagination_class = StandardResultsSetPagination
     serializer_class = StreetSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         name = self.kwargs.get('name', '')
@@ -125,7 +131,8 @@ class StreetViewSet(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class DelayedPaymentView(HistoryMixin, SchemaMixin, generics.ListAPIView):
     pagination_class = StandardResultsSetPagination
     serializer_class = CustomerSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         return Customer.objects.filter(has_delayed_payment__exact=True).distinct().order_by('id')
@@ -136,7 +143,8 @@ class ContractViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         print(self.action)
         return ContractSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 def fastStreets(request, **kwargs):
@@ -233,13 +241,15 @@ def getAnon(request):
 class DelayedPaymentViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = DelayedPaymentSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class CustomersByNameList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = CustomerSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         name = self.kwargs['name']
@@ -250,7 +260,8 @@ class CustomersByNameList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class CustomersByExternalIdList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = CustomerSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         id = self.kwargs['id']
@@ -258,7 +269,8 @@ class CustomersByExternalIdList(HistoryMixin, SchemaMixin, generics.ListAPIView)
 
 class StaffByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = StaffSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         year = self.kwargs['year']
         month = self.kwargs['month']
@@ -273,7 +285,8 @@ class StaffByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 
 class ActiveStaffByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = StaffSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         year = self.kwargs['year']
         month = self.kwargs['month']
@@ -296,7 +309,8 @@ class ActiveStaffByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class TimesByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = FullTimesRecordSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         year = self.kwargs['year']
         month = self.kwargs['month']
@@ -309,7 +323,8 @@ class TimesByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class TimesByMonthList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = FullTimesRecordSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         year = self.kwargs['year']
         month = self.kwargs['month']
@@ -320,7 +335,8 @@ class TimesByMonthList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     
 class StaffNames(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = StaffNamesSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     staff = Staff.objects.all().order_by('user__first_name')
     if (len(staff) == 0):
         from django.contrib.auth import get_user_model
@@ -336,7 +352,8 @@ class StaffNames(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = ArchiveContractSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         """
         View returns all contracts except if theres a date parameter in the url
@@ -372,7 +389,8 @@ class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class =ContractGetSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         """
@@ -391,13 +409,15 @@ class PreordersList(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class  RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = RepeatedContractSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 class ContractsByDateList(HistoryMixin, SchemaMixin, generics.ListAPIView):
     def get_serializer_class(self):
         return ContractGetSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         """
         View returns all contracts except if theres a date parameter in the url
@@ -464,7 +484,8 @@ class ContractsSelfByDateList(ContractsByDateList):
 class RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = RepeatedContractSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         weekday = self.kwargs.get('weekday', '')
@@ -476,7 +497,8 @@ class RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
 class TerminatedRepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
     serializer_class = ContractSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         weekday = self.kwargs.get('weekday', '')
@@ -490,14 +512,16 @@ class ContractPositionViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     queryset = ContractPosition.objects.all().order_by('start_time')
     pagination_class = StandardResultsSetPagination
     serializer_class = ContractPositionSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class CustomerViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     queryset = Customer.objects.all().order_by('name')
     pagination_class = StandardResultsSetPagination
     serializer_class = CustomerSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
 
 
 class SettingsViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
@@ -509,4 +533,5 @@ class SettingsViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
         queryset = Settings.objects.all().order_by('id')
     
     serializer_class = SettingsSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [IsAuthenticated]
+
