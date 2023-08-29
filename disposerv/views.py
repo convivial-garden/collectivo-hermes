@@ -470,15 +470,14 @@ class ContractsSelfByDateList(ContractsByDateList):
         year = self.kwargs.get('year', '')
         month = self.kwargs.get('month', '')
         day = self.kwargs.get('day', '')
-        rider_id = self.request.user.id
+        print("get self contracts", self.request.user.id )
         return Contract.objects \
             .filter(positions__start_time__year=year,
                     positions__start_time__month=month,
                     positions__start_time__day=day,
-                    positions__dispo__dispatched_to__id=rider_id,
+                    positions__dispo__dispatched_to__user=self.request.user.id,
                     positions__dispo__preliminary=False,
-                    #repeated__isnull=True
-                    ) \
+
             .order_by('id') \
             .distinct()
 class RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
