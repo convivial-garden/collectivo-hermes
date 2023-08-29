@@ -2,6 +2,12 @@ version: "3.9"
 
 services:
   # A customized instance of collectivo for Hermes.
+  hermes-frontend:
+    build: ./docker/hermes-frontend
+    restart: always
+    environment:
+      VIRTUAL_HOST: ${HERMES_FRONTEND_URL_BASE}
+      VIRTUAL_PORT: 8000
   collectivo:
     restart: always
 

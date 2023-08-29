@@ -1,0 +1,3 @@
+[submodule "docker/hermes-frontend"]
+	path = docker/hermes-frontend
+	url = https://github.com/convivial-garden/hermes-frontend.git
