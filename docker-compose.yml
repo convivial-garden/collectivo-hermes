@@ -1,6 +1,12 @@
 version: "3.9"
 
 services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
   # A customized instance of collectivo for Hermes.
   hermes-frontend:
     build: ./docker/hermes-frontend
