@@ -237,9 +237,9 @@ def update_disposerv_user(sender, instance, created, **kwargs):
     Staff.find_or_create_user(sender, instance)
 
 
-# signals.post_save.connect(
-#     update_disposerv_user,
-#     sender=get_user_model(),
-#     dispatch_uid="update_disposerv_user",
-#     weak=False,
-# )
+signals.post_save.connect(
+    update_disposerv_user,
+    sender=get_user_model(),
+    dispatch_uid="update_disposerv_user",
+    weak=False,
+)
