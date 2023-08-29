@@ -477,7 +477,7 @@ class ContractsSelfByDateList(ContractsByDateList):
                     positions__start_time__day=day,
                     positions__dispo__dispatched_to__user=self.request.user.id,
                     positions__dispo__preliminary=False,
-
+                    ) \
             .order_by('id') \
             .distinct()
 class RepeatedContracts(HistoryMixin, SchemaMixin, generics.ListAPIView):
