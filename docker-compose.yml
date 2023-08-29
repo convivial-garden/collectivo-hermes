@@ -7,6 +7,12 @@ services:
       - "80:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs:ro 
+  self-signed-proxy-companion:
+    image: sebastienheyd/self-signed-proxy-companion
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro \
+      - ./certs:/etc/nginx/certs:rw \
   # A customized instance of collectivo for Hermes.
   hermes-frontend:
     build: ./docker/hermes-frontend
