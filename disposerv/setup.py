@@ -27,14 +27,14 @@ def setup(sender, **kwargs):
         component="1",
         extension=extension,
         requires_group="collectivo.disposerv.user",
-        link="http://localhost:8005",
+        link="https://frontend.hermes",
         target="component",
     )
 
     button = DashboardTileButton.objects.register(
         name="disposerv_button",
         label="Weiter",
-        link="http://localhost:8005",
+        link="https://frontend.hermes",
         link_type="external",
     )
 
@@ -51,7 +51,7 @@ def setup(sender, **kwargs):
     Component.objects.register(
         name='disposerv',
         type='remote',
-        path='http://localhost:4173/assets/disposerv.js',
+        path='https://frontend.hermes/assets/disposerv.js',
         extension=extension,
     )
 
@@ -60,8 +60,8 @@ def setup(sender, **kwargs):
     # Admin objects
     # TODO Warning if os environ var is missing
     MenuItem.objects.register(
-        name="disposerv_admin",
-        label="Dispo admin2",
+        name="disposerv_admin2",
+        label="Dispo admin",
         icon_name="pi-money-bill",
         parent="admin",
         component="1",
