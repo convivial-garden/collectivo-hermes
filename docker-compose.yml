@@ -13,7 +13,7 @@ services:
     restart: always
     environment:
       VIRTUAL_HOST: ${HERMES_FRONTEND_URL_BASE}
-      VIRTUAL_PORT: 8000
+      VIRTUAL_PORT: 80
   collectivo:
     restart: always
 
@@ -23,8 +23,6 @@ services:
       - ./collectivo/extensions/hermes:/collectivo_app/hermes
       - ./disposerv:/collectivo_app/hermes/disposerv
       - ./uploads:/collectivo_app/media_root
-      - ../collectivo/collectivo_app:/collectivo_app
-      - ../collectivo/collectivo:/collectivo_app/collectivo
     command: >
       sh -c "while ! nc -z collectivo-db 5432; do sleep 1; done &&
              while ! nc -z keycloak 8080; do sleep 1; done &&
@@ -64,8 +62,6 @@ services:
       - collectivo-db
       - keycloak
       - redis
-    ports:
-      - "8000:8000"
     links:
       - keycloak
 
@@ -80,8 +76,6 @@ services:
       - ./collectivo/extensions/hermes:/collectivo_app/hermes
       - ./disposerv:/collectivo_app/hermes/disposerv
       - ./uploads:/collectivo_app/media_root
-      - ../collectivo/collectivo_app:/collectivo_app
-      - ../collectivo/collectivo:/collectivo_app/collectivo
     environment:
       DB_HOST: collectivo-db
       DB_NAME: collectivo_db
@@ -123,8 +117,6 @@ services:
       - ./collectivo/extensions/hermes:/collectivo_app/hermes
       - ./disposerv:/collectivo_app/hermes/disposerv
       - ./uploads:/collectivo_app/media_root
-      - ../collectivo/collectivo_app:/collectivo_app
-      - ../collectivo/collectivo:/collectivo_app/collectivo
     environment:
       DB_HOST: collectivo-db
       DB_NAME: collectivo_db
