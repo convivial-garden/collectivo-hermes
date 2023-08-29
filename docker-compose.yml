@@ -233,8 +233,7 @@ services:
       - ./docker/keycloak/import:/opt/keycloak/data/import:ro
       - ./docker/keycloak/themes/hermes:/opt/keycloak/themes/hermes:ro
       - ./docker/keycloak/export:/tmp/export
-      - ./docker/keycloak/healthcheck.sh:/healthcheck.sh
-    command: start-dev --import-realm
+      - ./docker/keycloak/imported/:/opt/keycloak/imported/
     ports:
       - "8080:8080"
     labels:
