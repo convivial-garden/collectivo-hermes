@@ -105,8 +105,6 @@ class Staff(models.Model):
     
     def find_or_create_user(sender, instance, **kwargs):
         staff, created = Staff.objects.update_or_create(user=instance)
-        if created:
-            Staff.objects.create(user=instance)
 
 class TimesRecord(models.Model):
     date = models.DateTimeField(auto_now_add=True)
