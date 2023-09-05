@@ -587,31 +587,48 @@ class RepeatedContractSerializer(serializers.HyperlinkedModelSerializer):
                   'repeated'
                     )
 
-    # def update(self, instance, validated_data):
-    #     positions = validated_data.pop('positions', [])
+class RepeatedContractPutSerializer(serializers.HyperlinkedModelSerializer):
+    positions = RepeatedContractPositionSerializer(many=True, default=[])
+    repeated = RepeatedSerializer(default=None, allow_null=True)
+    class Meta:
+        model = RepeatedContract
+        fields = ('id',
+                  'created',
+                  'zone',
+                  'distance',
+                  'price',
+                  'extra',
+                  'customer',
+                  'positions',
+                  'type',
+                  'repeated'
+                    )
 
-    #     instance.zone = validated_data.get('zone', instance.zone)
-    #     instance.distance = validated_data.get('distance', instance.distance)
-    #     instance.price = validated_data.get('price', instance.price)
-    #     instance.extra = validated_data.get('extra', instance.extra)
-    #     instance.customer = validated_data.get('customer', instance.customer)
-    #     instance.type = validated_data.get('type', instance.type)
-    #     instance.save()
+    def update(self, instance, validated_data):
+        positions = validated_data.pop('positions', [])
 
-    #     if hasattr(instance, 'repeated'):
-    #         repeated_instance = update_repeated(instance.repeated, validated_data)
-    #     elif (validated_data.get('repeated')):
-    #         Repeated.objects.create(**validated_data.get('repeated'), contract=instance)
+        instance.zone = validated_data.get('zone', instance.zone)
+        instance.distance = validated_data.get('distance', instance.distance)
+        instance.price = validated_data.get('price', instance.price)
+        instance.extra = validated_data.get('extra', instance.extra)
+        instance.customer = validated_data.get('customer', instance.customer)
+        instance.type = validated_data.get('type', instance.type)
+        instance.save()
 
-    #     for instance_position in instance.positions.all():
-    #         try:
-    #             position_data = positions.pop(0)
-    #             instance_position = update_position(instance_position, position_data)
-    #             instance_position.save()
-    #         except IndexError:
-    #             pass
+        if hasattr(instance, 'repeated'):
+            repeated_instance = update_repeated(instance.repeated, validated_data)
+        elif (validated_data.get('repeated')):
+            Repeated.objects.create(**validated_data.get('repeated'), contract=instance)
 
-    #     for further_position_data in positions:
-    #         create_new_position(further_position_data, contract=instance)
+        for instance_position in instance.positions.all():
+            try:
+                position_data = positions.pop(0)
+                instance_position = update_position(instance_position, position_data)
+                instance_position.save()
+            except IndexError:
+                pass
 
-    #     return instance
+        for further_position_data in positions:
+            create_new_position(further_position_data, contract=instance)
+
+        return instance

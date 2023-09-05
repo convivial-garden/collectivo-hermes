@@ -60,7 +60,9 @@ from .serializers import \
     DelayedPaymentSerializer, \
     FullTimesRecordSerializer, \
     SettingsSerializer, \
-    RepeatedContractSerializer
+    RepeatedContractSerializer, \
+    RepeatedContractPutSerializer \
+    
 
 #
 class StandardResultsSetPagination(PageNumberPagination):
@@ -141,8 +143,14 @@ class ContractViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Contract.objects.all().order_by('id')
     def get_serializer_class(self):
-        print(self.action)
         return ContractSerializer
+    permission_classes = [IsAuthenticated]
+
+class RepeatedContractViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
+    pagination_class = StandardResultsSetPagination
+    queryset = RepeatedContract.objects.all().order_by('id')
+    def get_serializer_class(self):
+        return RepeatedContractPutSerializer
     permission_classes = [IsAuthenticated]
 
 

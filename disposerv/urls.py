@@ -18,6 +18,7 @@ router.register(r'dispo', views.DispoViewSet)
 router.register(r'delayedpayment', views.DelayedPaymentViewSet)
 router.register(r'customers', views.CustomerViewSet)
 router.register(r'settings', views.SettingsViewSet)
+router.register(r'repeated', views.RepeatedContractViewSet)
 
 
 
