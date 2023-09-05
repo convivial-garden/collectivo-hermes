@@ -455,6 +455,7 @@ class ArchivePositionSerializer(serializers.HyperlinkedModelSerializer):
 
 class ArchiveContractSerializer(serializers.HyperlinkedModelSerializer):
     positions = ArchivePositionSerializer(many=True, read_only=True)
+    customer = CustomerSerializer(read_only=True)
     class Meta:
         model = Contract
         fields = ('id',

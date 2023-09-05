@@ -374,15 +374,23 @@ class ContractsArchiveList(HistoryMixin, SchemaMixin, generics.ListAPIView):
             archive_kwargs['positions__start_time__day'] = day
         if (riderId != ''):
             archive_kwargs['positions__dispo__dispatched_to__id'] = riderId
-        if (customerId != ''):
-            archive_kwargs['positions__customer__id'] = customerId
+        # if (customerId != ''):
+        #     archive_kwargs['positions__customer__id'] = customerId
+        #     archive_kwargs['customer__id'] = customerId
+
 
 
         assigned_contracts_ids = Contract.objects.filter(positions__position__gte=1, positions__dispo__isnull=False).distinct().order_by('id')
-
-        response = Contract.objects \
-            .filter(id__in=assigned_contracts_ids, **archive_kwargs)\
-            .distinct().order_by('id')
+        response = []
+        if (customerId == ''):
+            response = Contract.objects \
+                .filter(id__in=assigned_contracts_ids, **archive_kwargs)\
+                .distinct().order_by('id')
+        else:
+            response = Contract.objects \
+                .filter(id__in=assigned_contracts_ids, **archive_kwargs)\
+                .filter(Q(positions__customer__id = customerId) | Q(customer__id = customerId)) \
+                .distinct().order_by('id')
         response.order_by('-positions__dispo__created')
         return response
 

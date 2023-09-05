@@ -9,7 +9,7 @@ services:
       - ../collectivo/collectivo_app:/collectivo_app
       - ../collectivo/collectivo:/collectivo_app/collectivo
       - ./collectivo/collectivo-dev.yml:/collectivo_app/collectivo.yml
-      - ./collectivo/extensions/hermes:/collectivo_app/hermes
+      - ./disposerv:/collectivo_app/hermes/disposerv
       - ./uploads:/collectivo_app/media_root/
     command: >
       sh -c "python manage.py migrate &&
@@ -22,7 +22,8 @@ services:
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
       ALLOWED_HOSTS: ${COLLECTIVO_URL}
       ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
-      KEYCLOAK_URL: ${KEYCLOAK_URL}
+      KEYCLOAK_URL: ${COLLECTIVO_KEYCLOAK_URL}
+      COLLECTIVO_KEYCLOAK_SERVER_URL: ${COLLECTIVO_KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: ${REDIS_URL}
       CELERY_BACKEND: ${REDIS_URL}

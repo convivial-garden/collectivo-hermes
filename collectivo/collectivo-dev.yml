@@ -15,7 +15,7 @@ api_docs: true
 extensions:
   - collectivo.core
   - collectivo.auth.keycloak:
-      - server_url: ${KEYCLOAK_SERVER_URL}
+      - server_url: ${KEYCLOAK_URL}
       - realm_name: collectivo
       - client_id: collectivo
       - client_secret: ${KEYCLOAK_CLIENT_SECRET}
