@@ -193,27 +193,25 @@ def fastStreets(request, **kwargs):
                                         nr = "-1"
                                         if 'houseNumber' in element['address']:
                                             nr = element['address']['houseNumber']
-                                        print(nr)
                                         postal_code = "0000"
                                         if 'postalCode' in element['address']:
                                             postal_code = element['address']['postalCode']
 
-                                        street = StreetWithNumber.objects.update_or_create(name=name, 
+                                        StreetWithNumber.objects.update_or_create(name=name, 
                                                                         nr = nr,
                                                                        postal_code=postal_code,
                                                                        lat= element['position']['lat'],
-                                                                         lon= element['position']['lng'],  )
-                                        results.append({"value": str(len(results)), "label": element["title"], "data": street})
+                                                                        lon= element['position']['lng'],  )
+                                result = StreetWithNumber.objects.filter(name__istartswith=name_split[0])
+                                result = result.distinct()                                        
                 except Exception as error:
                     print("ERROR: failed to query here maps", error)
-        else:
-            for (index, res) in enumerate(result.values()):
-                label = res['name']+" "+res['nr'] + " "+res['postal_code']
-                print(res['nr'])
-                if (res['nr'] == "-1"):
-                    label = res['name'] + " "+res['postal_code']
-                results.append({"value": str(index), "label":label, "data": res})
-    print(results)
+        
+        for (index, res) in enumerate(result.values()):
+            label = res['name']+" "+res['nr'] + " "+res['postal_code']
+            if (res['nr'] == "-1"):
+                label = res['name'] + " "+res['postal_code']
+            results.append({"value": str(index), "label":label, "data": res})
     return JsonResponse(results, safe=False)
 
 

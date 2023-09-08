@@ -60,7 +60,7 @@ def setup(sender, **kwargs):
     # Admin objects
     # TODO Warning if os environ var is missing
     MenuItem.objects.register(
-        name="disposerv_admin2",
+        name="disposerv_admin",
         label="Dispo admin",
         icon_name="pi-money-bill",
         parent="admin",
@@ -68,6 +68,6 @@ def setup(sender, **kwargs):
         extension=extension,
         requires_group="collectivo.core.admin",
         route="disposerv/disposerv",
-        target="component",
+        target="route",
         order=1,
     )
