@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   nginx-proxy:
+    restart: always
     image: jwilder/nginx-proxy
     ports:
       - "80:80"
@@ -158,6 +159,7 @@ services:
 
   # A communication broker for celery.
   redis:
+    restart: always
     image: redis:7.0-alpine
     command: >
       --requirepass "${REDIS_PASSWORD}" --appendonly yes --maxmemory 1000mb
@@ -173,6 +175,7 @@ services:
 
   # A PostgreSQL database.
   collectivo-db:
+    restart: always
     image: postgres:14-alpine
     volumes:
       - collectivo-db-data:/var/lib/postgresql/data
@@ -203,6 +206,7 @@ services:
 
   # Database for keycloak
   keycloak-db:
+    restart: always
     image: postgres:14-alpine
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
@@ -215,6 +219,7 @@ services:
 
   # Keycloak for authentication.
   keycloak:
+    restart: always
     build: ./docker/keycloak
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
@@ -239,6 +244,8 @@ services:
       - ./docker/keycloak/imported/:/opt/keycloak/imported/
     labels:
       io.portainer.accesscontrol.teams: ${PORTAINER_TEAM_ID}
+    ports:
+      - "8080:8080"
 
 volumes:
   collectivo-db-data:
