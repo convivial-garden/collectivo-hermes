@@ -27,7 +27,7 @@ def generateRepeatedContracts(req):
         logging.basicConfig(level=logging.DEBUG)
         logger = logging.getLogger(__name__)
         logger.debug("###########################################################")
-        logger.debug("DEBUG ----------- generateRepeatedContracts3 ---------------")
+        logger.debug("DEBUG ----------- generateRepeatedContracts ---------------")
         logger.debug("###########################################################")
 
         repeated_contracts = RepeatedContract.objects \
@@ -37,22 +37,14 @@ def generateRepeatedContracts(req):
         len_repeated_contracts = len(repeated_contracts)
         print("len_repeated_contracts {}".format(len_repeated_contracts))
         for contract in repeated_contracts:
-            logger.debug("Contract ID {}".format(contract.id))
-            logger.debug("generating contracts until end of week")
             current_date = datetime.today().replace(tzinfo=pytz.UTC)
-            logger.debug("start date {}".format(current_date))
             one_past_end_date = current_date + timedelta(days=(9 ))
-            logger.debug("one past end date {}".format(one_past_end_date))
+            logger.debug("Contract ID {} from {} to {}".format(contract.id, current_date, one_past_end_date))
             while current_date != one_past_end_date:
-                logger.debug("days of the week {}".format(contract.repeated.days_of_the_week))
                 if WEEKDAYS[current_date.weekday()] in contract.repeated.days_of_the_week:
                     cd= timezone.make_aware(datetime.combine(current_date, datetime.min.time()))
-                    logger.debug("date for contract {}".format(cd))
-                    # check if contract already exists
                     if not RepeatedContractForDate.objects.filter(repeated=contract.repeated.id, date=cd).exists():
                         generateContractFromRepeatedContract(cd, contract)
-                    else: 
-                        logger.debug("contract already exists")
                 current_date = current_date + timedelta(days=1)
             contract.repeated.save()
         logger.debug("###########################################################")
@@ -70,7 +62,7 @@ def generateContractFromRepeatedContract(current_date, cntrct):
         logger.debug("###########################################################")
         logger.debug("DEBUG ----------- generateContractFromRepeatedContract ---------------")
         logger.debug("###########################################################")
-        logger.debug("Generate a contract on {} for repeadted contract".format(WEEKDAYS[current_date.weekday()]))
+        logger.debug("Generate a contract on {} for repeadted contract {}".format(WEEKDAYS[current_date.weekday()], cntrct.id))
         all_positions = cntrct.positions.all()
         logger.debug("positions {}".format(all_positions))
         repeated_id = cntrct.repeated.id

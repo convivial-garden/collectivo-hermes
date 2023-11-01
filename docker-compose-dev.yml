@@ -53,10 +53,11 @@ services:
     command: celery -A collectivo_app worker -l info
     build: ./collectivo
     volumes:
-      - ../collectivo/collectivo_app:/collectivo_app
-      - ../collectivo/collectivo:/collectivo_app/collectivo
       - ./collectivo/collectivo-dev.yml:/collectivo_app/collectivo.yml
       - ./collectivo/extensions/hermes:/collectivo_app/hermes
+      - ./disposerv:/collectivo_app/hermes/disposerv
+      - ../collectivo/collectivo_app:/collectivo_app
+      - ../collectivo/collectivo:/collectivo_app/collectivo
     environment:
       DB_HOST: collectivo-db
       DB_NAME: collectivo_db
@@ -93,6 +94,7 @@ services:
     volumes:
       - ../collectivo/collectivo_app:/collectivo_app
       - ../collectivo/collectivo:/collectivo_app/collectivo
+      - ./disposerv:/collectivo_app/hermes/disposerv
       - ./collectivo/collectivo-dev.yml:/collectivo_app/collectivo.yml
       - ./collectivo/extensions/hermes:/collectivo_app/hermes
     environment:
